@@ -64,7 +64,10 @@
 .layout{flex:1 1 auto;min-height:0;align-items:stretch;overflow:hidden}
 .layout>aside{min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
 .play-area{min-height:0;display:flex;flex-direction:column;overflow:hidden}
-.play-area>.board{flex:1 1 auto;min-height:0;align-items:center}
+/* 宽度必须是 auto + align-self:center 才能收缩到画布宽度。
+   只加 align-self 不管用 —— 更早的 `.board{width:100%}` 会把它撑满整列
+   （实测仍是 1048px，而画布 535px，边框两侧各空 256px，看起来像布局坏了）。 */
+.play-area>.board{flex:1 1 auto;min-height:0;width:auto;align-self:center}
 /* 顶栏与预览位不参与压缩（否则空间紧张时会被压扁） */
 .play-area>.topbar{flex:0 0 auto}
 .play-area>#previewHint{flex:0 0 auto}

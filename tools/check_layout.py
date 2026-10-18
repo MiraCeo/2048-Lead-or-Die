@@ -118,6 +118,12 @@ for sz in SIZES:
     ok = (vh > 0 and sh == vh and 0 < fbot <= vh)
     check(ok, '%-10s 视口高 %4d · 文档高 %4d · 页脚底 %4d · 棋盘 %3dpx'
               % (sz, vh, sh, fbot, bw))
+    # 棋盘**框**应当贴着画布；被拉成整列宽时两侧会有大片空白
+    # （实测曾出现 1048px 框 / 535px 画布，各空 256px，看起来像布局坏了）
+    bd = grab(r'\.board:\s*x=\d+\s*y=\d+\s*w=(\d+)')
+    check(bd > 0 and bw > 0 and (bd - bw) <= 24,
+          '%-10s 棋盘框 %3dpx 贴合画布 %3dpx（差值 %d，应为内边距+边框 18）'
+          % (sz, bd, bw, bd - bw))
 
 print()
 print('%d 项失败' % len(fails))

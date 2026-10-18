@@ -107,6 +107,7 @@ window.addEventListener('load', () => {
   push('.layout', document.querySelector('.layout'));
   push('.play-area', document.querySelector('.play-area'));
   push('canvas#canvas', document.getElementById('canvas'));
+  push('.board', document.querySelector('.board'));
   push('.topbar', document.querySelector('.topbar'));
   push('.status-slot', document.querySelector('.status-slot'));
   push('#inspect', document.getElementById('inspect'));

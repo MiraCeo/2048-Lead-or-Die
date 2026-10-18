@@ -35,3 +35,11 @@ __pycache__/
 # 它只用于证明"重建逐字节相同"，而 `git diff --stat -- src/main.script.js` 为空
 # 是更直接的同等证据，所以不必长期保留。
 /build/reference/main.script.original.js
+
+# tools/shot.py 的临时产物：截图、ASCII 名副本（中文文件名会被 Chrome 当成多个目标）、
+# 以及无头 Chrome 的 profile（含 localStorage，每次跑都会变）。
+# 截图是**诊断产物**，随时可用 `python tools/shot.py` 重拍，不入库。
+/build/shot.png
+/build/_shot_src.html
+/build/_probe.html
+/build/chromeprof/
