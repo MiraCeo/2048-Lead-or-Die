@@ -43,6 +43,22 @@ const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
 const ENGINE = fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8');
+
+// 源码层断言助手：忽略**所有空白**再比对。
+// 原因：断言检查的是实现约束（如"进度条 22×4"），而 prettier 会加空格，
+// 用裸 includes 会因排版差异误报。归一化后断言表达的是"语义在场"，与排版无关。
+const _sq = (v) => String(v).replace(/\s+/g, '');
+function has(src, pat) {
+  const found = _sq(src).includes(_sq(pat));
+  if (!found) console.log('        [has] 未找到（归一化后）: ' + pat);
+  return found;
+}
+function notHas(src, pat) {
+  const found = _sq(src).includes(_sq(pat));
+  if (found) console.log('        [notHas] 不该存在但找到了（归一化后）: ' + pat);
+  return !found;
+}
+
 vm.runInThisContext(ENGINE);
 const HTML = fs.readFileSync(path.join(ROOT, DELIVERABLE), 'utf8');
 
@@ -76,40 +92,40 @@ console.log('\n=== 关键 id 必须唯一 ===');
 
 console.log('\n=== 状态条改为不占位的临时浮层 ===');
 {
-  check(!HTML.includes('id="status"'), '常驻状态条已删除');
-  check(HTML.includes('class="feedback"'), '临时浮层在场');
-  check(HTML.includes('.feedback{position:absolute'), '浮层是绝对定位（不占布局空间）');
-  check(ENGINE.includes("$('feedback')"), 'say() 已改到浮层');
-  check(!ENGINE.includes("$('status')"), '旧的状态条引用已清除');
+  check(notHas(HTML, 'id="status"'), '常驻状态条已删除');
+  check(has(HTML, 'class="feedback"'), '临时浮层在场');
+  check(has(HTML, '.feedback{position:absolute'), '浮层是绝对定位（不占布局空间）');
+  check(has(ENGINE, "$('feedback')"), 'say() 已改到浮层');
+  check(notHas(ENGINE, "$('status')"), '旧的状态条引用已清除');
   const iHint = HTML.indexOf('id="previewHint"'), iCanvas = HTML.indexOf('id="canvas"');
   check(iHint > 0 && iCanvas > 0 && iHint < iCanvas, '预览结果位仍在棋盘之前');
 }
 
 console.log('\n=== 规则搬进游戏介绍 ===');
 {
-  check(GUIDE.includes('>画面与科技<'), '介绍页导航加入了新章节');
-  check(GUIDE.includes('画面读法、小地图与科技点'), '介绍页含新章节标题');
-  check(GUIDE.includes('整体轮廓'), '画布底部的轮廓说明已搬入介绍');
-  check(GUIDE.includes('科技点'), '科技点来源已写入介绍');
-  check(!ENGINE.includes('实心底色区分阵营'), '画布底部规则文字已从引擎移除');
-  check(!ENGINE.includes('碉堡每回合射击'), '画布底部的射程/补给说明已移除');
-  check(!HTML.includes('点击绿色核心标记切换视野'), '小地图提示不再常驻');
-  check(HTML.includes('<div id="previewHint" class="mini-detail map-keyhint"></div>'),
+  check(has(GUIDE, '>画面与科技<'), '介绍页导航加入了新章节');
+  check(has(GUIDE, '画面读法、小地图与科技点'), '介绍页含新章节标题');
+  check(has(GUIDE, '整体轮廓'), '画布底部的轮廓说明已搬入介绍');
+  check(has(GUIDE, '科技点'), '科技点来源已写入介绍');
+  check(notHas(ENGINE, '实心底色区分阵营'), '画布底部规则文字已从引擎移除');
+  check(notHas(ENGINE, '碉堡每回合射击'), '画布底部的射程/补给说明已移除');
+  check(notHas(HTML, '点击绿色核心标记切换视野'), '小地图提示不再常驻');
+  check(has(HTML, '<div id="previewHint" class="mini-detail map-keyhint"></div>'),
         '棋盘上方的预览位默认是空的');
-  check(ENGINE.includes("$('previewHint').textContent=''"),
+  check(has(ENGINE, "$('previewHint').textContent=''"),
         'clearPreview() 清空预览位，而不是把操作说明写回去');
 }
 
 console.log('\n=== 信息重复与命名 ===');
 {
-  check(!HTML.includes('class="badge">100 × 100 世界'), '顶部重复的世界／视野徽标已删除');
-  check(HTML.includes('COMMAND / 当前控制核心'), '标题为「当前控制核心」');
-  check(HTML.includes('全队共享 core'), '「全队共享 core」在场');
-  check(HTML.includes('最高合成值'), '「最高合成值」在场');
-  check(!HTML.includes('每2回合 +1'), '行动点固定规则不再常驻');
-  check(!HTML.includes('补给：视野内每2回合 +1，视野外每回合 +3'), '战场面板重复的补给规则已删除');
-  check(!HTML.includes('EXPLORATION · FORMATION'), '页脚装饰英文已改为中文');
-  check(HTML.includes('font-size:11px;letter-spacing:0'),
+  check(notHas(HTML, 'class="badge">100 × 100 世界'), '顶部重复的世界／视野徽标已删除');
+  check(has(HTML, 'COMMAND / 当前控制核心'), '标题为「当前控制核心」');
+  check(has(HTML, '全队共享 core'), '「全队共享 core」在场');
+  check(has(HTML, '最高合成值'), '「最高合成值」在场');
+  check(notHas(HTML, '每2回合 +1'), '行动点固定规则不再常驻');
+  check(notHas(HTML, '补给：视野内每2回合 +1，视野外每回合 +3'), '战场面板重复的补给规则已删除');
+  check(notHas(HTML, 'EXPLORATION · FORMATION'), '页脚装饰英文已改为中文');
+  check(has(HTML, 'font-size:11px;letter-spacing:0'),
         '面板标题字号已放大、字距已归零（否则长标题会折行）');
   check(!/h2\{[^}]*letter-spacing:1px/.test(HTML),
         'h2 规则里不再有 1px 字距（那会让标题多出约 18px）');
@@ -118,20 +134,20 @@ console.log('\n=== 信息重复与命名 ===');
 
 console.log('\n=== 棋盘尺寸不再用魔法数字 ===');
 {
-  check(HTML.includes('max-height:calc(100dvh - var(--board-chrome,230px))'),
+  check(has(HTML, 'max-height:calc(100dvh - var(--board-chrome,230px))'),
         '棋盘高度交给浏览器按可用空间算（开销是单个可调变量）');
-  check(HTML.includes('.board canvas{width:auto;height:auto'), 'canvas 等比缩放（不再拉伸）');
+  check(has(HTML, '.board canvas{width:auto;height:auto'), 'canvas 等比缩放（不再拉伸）');
 }
 
 console.log('\n=== 画布：去掉顶部标签与下方留空，坐标保留 ===');
 {
-  check(HTML.includes('id="canvas" width="860" height="860"'), '画布改为 860×860（下方不再留白）');
-  check(!ENGINE.includes('EXPEDITION SECTOR'), '顶部左侧「100 × 100」标签已删');
-  check(!ENGINE.includes('CORE-CENTERED VIEW'), '顶部右侧「25 × 25」标签已删');
-  check(!ENGINE.includes('886'), '引擎里不再有任何 886（坐标映射全部跟进）');
-  check(ENGINE.includes('text(cam.c+c+1') && ENGINE.includes('text(cam.r+c+1'),
+  check(has(HTML, 'id="canvas" width="860" height="860"'), '画布改为 860×860（下方不再留白）');
+  check(notHas(ENGINE, 'EXPEDITION SECTOR'), '顶部左侧「100 × 100」标签已删');
+  check(notHas(ENGINE, 'CORE-CENTERED VIEW'), '顶部右侧「25 × 25」标签已删');
+  check(notHas(ENGINE, '886'), '引擎里不再有任何 886（坐标映射全部跟进）');
+  check(has(ENGINE, 'text(cam.c+c+1') && has(ENGINE, 'text(cam.r+c+1'),
         '棋盘四周的行列坐标仍然保留');
-  check(ENGINE.includes("preview?'") === false, '画布不再自绘模式文字（顶栏 #modeLabel 已在显示）');
+  check(has(ENGINE, "preview?'") === false, '画布不再自绘模式文字（顶栏 #modeLabel 已在显示）');
 }
 
 console.log('\n=== 科技面板：侧栏只留入口，详情在按需面板 ===');
@@ -139,19 +155,19 @@ console.log('\n=== 科技面板：侧栏只留入口，详情在按需面板 ===
   check(HTML.includes('<strong id="tech"></strong><span class="mini-detail">科技点</span></div>'
                       + '<button id="openTech">打开科技树</button>'),
         '侧栏只剩「余额 + 打开科技树」');
-  check(HTML.includes('id="techDialog"'), '按需面板在场');
-  check(HTML.includes('class="panel-dialog"'), '按需面板有独立样式');
-  check(ENGINE.includes("row.className='tech-row'"),
+  check(has(HTML, 'id="techDialog"'), '按需面板在场');
+  check(has(HTML, 'class="panel-dialog"'), '按需面板有独立样式');
+  check(has(ENGINE, "row.className='tech-row'"),
         '列表改为行式渲染（名称/效果/按钮分开，不再挤进一个按钮标签）');
   const guards = (ENGINE.match(/\$\('techDialog'\)\.open/g) || []).length;
   check(guards >= 2, '面板打开时棋盘输入被拦住（鼠标与键盘各一处）', `guard=${guards}`);
-  check(ENGINE.includes("$('openTech').onclick") && ENGINE.includes("$('closeTech').onclick"),
+  check(has(ENGINE, "$('openTech').onclick") && has(ENGINE, "$('closeTech').onclick"),
         '打开/关闭已接线');
 }
 
 console.log('\n=== 核心从血量配色中排除 ===');
 {
-  check(ENGINE.includes("if(t.side==='p'&&!t.core&&t.hp<t.cap)"), '核心不再参与血量配色');
+  check(has(ENGINE, "if(t.side==='p'&&!t.core&&t.hp<t.cap)"), '核心不再参与血量配色');
 }
 
 console.log(`\n${failures} 项失败`);

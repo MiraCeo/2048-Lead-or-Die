@@ -1,22 +1,395 @@
 // ==== 90-draw ====
 // 来源: main.script.js 第 130–148 行（原样搬移，未改一字符）
 // 方块绘制、整帧 draw、特效渲染
-rect(p.x-half,p.y-half,size,size,rad,null,stroke);}
-function draw(){if(!s)return;const q=preview?.q||s,cam=camera(q),links=connected(q);ctx.clearRect(0,0,860,860);ctx.fillStyle='#111d18';ctx.fillRect(0,0,860,860);
-for(let r=0;r<V;r++)for(let c=0;c<V;c++){const i=(r+cam.r)*N+c+cam.c,p=screenPoint(i,cam);rect(p.x-C/2+1,p.y-C/2+1,C-2,C-2,3,'#1c2a21','#293b2d');}for(let c=0;c<V;c++){text(cam.c+c+1,X+c*C+C/2,Y-9,8,'#6d8966');text(cam.r+c+1,X-12,Y+c*C+C/2,8,'#6d8966');}
-ctx.lineWidth=5;ctx.strokeStyle='#bada9366';for(const i of links){if(!visible(i,cam))continue;for(const d of ['right','down']){const j=neighbor(i,d);if(links.has(j)&&visible(j,cam)){const a=screenPoint(i,cam),b=screenPoint(j,cam);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}ctx.lineWidth=1;
-for(let r=cam.r;r<cam.r+V;r++)for(let c=cam.c;c<cam.c+V;c++){const i=r*N+c,t=q.g[i];if(!t)continue;const p=screenPoint(i,cam),isPlayer=t.side==='p',member=links.has(i);let fill=t.support?(t.structure?'#96c5e5':'#b5d4e6'):t.side==='e'?(t.core?'#e8a28c':'#edb8a5'):t.side==='n'?(t.nc?'#e4d4a8':'#bdc7ad'):t.core?'#f0d18e':member?'#c5e29c':'#abd5dd';if(t.side==='p'&&!t.core&&t.hp<t.cap){const hr=t.hp/t.cap;fill=hr>HP_HURT?HP_COL_OK:hr>HP_CRIT?HP_COL_HURT:HP_COL_CRIT;}tileBody(p,14,28,4,fill,t.core?'#efc97a':t.side==='e'?'#b96c5e':t.side==='n'?'#51604c':member?'#7dab6b':'#6fa7b2',t);text(fmt(t.n),p.x,p.y+(t.core?-1:-3),fmt(t.n).length>4?8:fmt(t.n).length>3?10:fmt(t.n).length>2?13:17,digitColor(t.n));if(t.core||t.structure)text(t.structure?'▣':t.side==='e'?({fighter:'▲',bunker:'▣',collector:'⚒'}[t.kind]||'◆'):t.id===q.primary&&!q.primaryLost?'✣':'◇',p.x,p.y-10,7,t.side==='e'?'#693325':'#685027');if(t.side==='p'&&!t.support){const th=absorbThreshold(q),bx=p.x-11,by=p.y+8,bw=22,bh=4;if(t.n>th){rect(bx,by,bw,bh,2,'#7f8f7f',null);}else{rect(bx,by,bw,bh,2,'#0d1512',null);const pr=Math.max(0,Math.min(1,(t.payload||0)/t.n));if(pr>0)rect(bx,by,Math.max(2,Math.round(bw*pr)),bh,2,'#c8f195',null);}}if(t.id===selected){ctx.lineWidth=2;rect(p.x-15,p.y-15,30,30,5,null,'#effbd4');ctx.lineWidth=1;}}
-paintOutlines(q,cam);if(preview){const oldLinks=connected(s);for(let vr=0;vr<V;vr++)for(let vc=0;vc<V;vc++){const i=(cam.r+vr)*N+cam.c+vc;if(JSON.stringify(q.g[i])===JSON.stringify(s.g[i]))continue;const t=q.g[i],p=screenPoint(i,cam),old=t?s.g.findIndex(a=>a?.id===t.id):-1;let color='#effbd4';if(t?.side==='p'&&old>=0&&oldLinks.has(old)&&!links.has(i))color='#f1a373';if(t?.core&&t.side==='p'&&!s.g.some(a=>a?.core&&a.id===t.id))color='#d5a1f5';ctx.lineWidth=2;rect(p.x-15,p.y-15,30,30,4,null,color);ctx.lineWidth=1;}}
-const now=performance.now(),DUR={shot:450,absorb:420,pulse:480,hit:600,kill:520,regen:640};effects=effects.filter(f=>now-f.start<(DUR[f.kind||'shot']||450));if(!preview){ctx.save();ctx.beginPath();ctx.rect(X,Y-18,800,818);ctx.clip();for(const f of effects){const k=f.kind||'shot',age=Math.min(1,(now-f.start)/(DUR[k]||450)),fade=1-age;if(k==='shot'){if(!visible(f.from,cam)&&!visible(f.to,cam))continue;const a=screenPoint(f.from,cam),b=screenPoint(f.to,cam);ctx.globalAlpha=fade*.8;ctx.strokeStyle=f.side==='e'?'#ff9879':'#d6ef9a';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();continue;}if(k==='absorb'){if(!visible(f.from,cam)&&!visible(f.to,cam))continue;const o=screenPoint(f.from,cam),e=screenPoint(f.to,cam);ctx.globalAlpha=fade*.8;ctx.strokeStyle='#c8f195';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(e.x,e.y);ctx.stroke();ctx.globalAlpha=fade;ctx.fillStyle='#e6ff9c';ctx.beginPath();ctx.arc(o.x+(e.x-o.x)*age,o.y+(e.y-o.y)*age,2.5,0,6.2832);ctx.fill();continue;}if(!visible(f.at,cam))continue;const p=screenPoint(f.at,cam);if(k==='pulse'){ctx.globalAlpha=fade*.9;ctx.strokeStyle='#e6ff9c';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,6+18*age,0,6.2832);ctx.stroke();}else if(k==='regen'){ctx.globalAlpha=fade*.7;ctx.strokeStyle='#8fd98a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,10+12*age,0,6.2832);ctx.stroke();}else if(k==='hit'){ctx.globalAlpha=fade*.75;ctx.fillStyle='#ff6b5a';ctx.beginPath();ctx.arc(p.x,p.y,13,0,6.2832);ctx.fill();if(f.dmg){ctx.globalAlpha=fade;text('-'+f.dmg,p.x,p.y-16-14*age,10,'#ffd7cf');}}else if(k==='kill'){ctx.globalAlpha=fade*.9;ctx.strokeStyle='#c9d3c3';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,8+22*age,0,6.2832);ctx.stroke();ctx.globalAlpha=fade*.55;ctx.strokeStyle='#e8f0dd';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(p.x-9,p.y-9);ctx.lineTo(p.x+9,p.y+9);ctx.moveTo(p.x+9,p.y-9);ctx.lineTo(p.x-9,p.y+9);ctx.stroke();}}ctx.globalAlpha=1;ctx.restore();}
-paintDrag(q,cam);}
-function indexFromEvent(e){const box=canvas.getBoundingClientRect(),x=(e.clientX-box.left)*860/box.width,y=(e.clientY-box.top)*860/box.height,c=Math.floor((x-X)/C),r=Math.floor((y-Y)/C),cam=camera(s);return r>=0&&r<V&&c>=0&&c<V?(r+cam.r)*N+c+cam.c:-1;}
-function inspect(i){if(i<0||inspectedState===s&&inspectedIndex===i)return;inspectedState=s;inspectedIndex=i;const t=s.g[i];if(!t){$('inspect').textContent=`${Math.floor(i/N)+1}行 ${i%N+1}列 · 空地`;return;}const label=t.support?'友方支援碉堡':t.side==='n'?'中立':t.side==='e'?'敌方'+(kindName[(t.core?t:teamCore(s,t.team))?.kind||'squad']):connected(s).has(i)?'己方主体':'其他己方';$('inspect').textContent=`${Math.floor(i/N)+1}行 ${i%N+1}列 · ${label}${t.core?'核心':'数字'} ${t.n}。${t.side==='n'?(t.nc?'中立密集区：'+s.g.filter(u=>u?.side==='n'&&u.nc===t.nc).length+'块。':'散落中立数字；四向连通达到3块即形成密集区。'):`core=${coreValue(s,t)}${t.support?'（独立建筑）':''}，血量 ${t.hp}/${t.cap}，伤害 ${damage(s,t)}，射程8格。${t.side==='p'&&!t.support?(t.hp<t.cap?'受伤中：累积 '+(t.payload||0)+' 每回合转为回血（成长暂停）':'吸收上限 '+ABSORB_CAP+'（'+(t.n>=ABSORB_CAP?'已达上限，不再吸收':'可吸收 · 累积 '+(t.payload||0))+'）'):''}${t.side==='e'&&t.core?'编队 '+s.g.filter(u=>u?.side==='e'&&u.team===t.team).length+'/'+desiredSize(t)+' 块。':''}`}${t.core&&t.side==='p'?'点击切换核心与视野。':''}`;}
-function inputBlocked(){return s.dead||s.settled||$('goalDialog').open||$('dialog').open||$('guideDialog').open||$('tutorialDialog').open||$('techDialog').open;}
-function cancelDrag(){const active=drag;drag=null;if(active&&canvas.hasPointerCapture(active.pointerId))canvas.releasePointerCapture(active.pointerId);canvas.style.cursor='default';draw();}
-function clickCell(i){const t=s.g[i];if(t?.side==='p'&&t.core){switchCore(t.id);return;}if(t?.side==='p'&&t.support){selected=null;mode='main';ui();say('固定支援碉堡：自动攻击，不可移动、置换或合并，不计入存活核心。');return;}if(t?.side==='p'){if(selected===t.id&&mode==='extra'){setMode('main');return;}selected=t.id;mode='extra';ui();say(`已选中 ${fmt(t.n)} · 方向键单块移动；拖动到另一己方非核心数字可置换。`);}else{selected=null;mode='main';ui();say(t?.side==='e'?'敌方不能直接操作。已返回主体移动。':t?'中立数字不能直接操作。已返回主体移动。':'已取消选择，方向键控制当前主体。');}}
-canvas.addEventListener('pointerdown',e=>{if(inputBlocked()||!e.isPrimary||e.button!==0)return;e.preventDefault();preview=null;const i=indexFromEvent(e),t=s.g[i];drag={pointerId:e.pointerId,start:i,first:t?.side==='p'&&!t.core&&!t.support?t.id:null,startX:e.clientX,startY:e.clientY,moved:false,over:i,x:0,y:0};canvas.setPointerCapture(e.pointerId);canvas.focus({preventScroll:true});draw();});
-canvas.addEventListener('pointermove',e=>{inspect(indexFromEvent(e));if(!drag||e.pointerId!==drag.pointerId)return;if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>=6)drag.moved=true;drag.over=indexFromEvent(e);const box=canvas.getBoundingClientRect();drag.x=(e.clientX-box.left)*860/box.width;drag.y=(e.clientY-box.top)*860/box.height;if(drag.moved&&drag.first){canvas.style.cursor='grabbing';draw();}});
-canvas.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.pointerId)return;const active=drag,targetIndex=indexFromEvent(e);drag=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);canvas.style.cursor='default';if(inputBlocked()){draw();return;}if(active.moved){if(active.first){const target=s.g[targetIndex];if(targetIndex<0){say('拖动已取消：只能在当前视野内置换。');draw();}else if(!target){say('置换目标必须是己方非核心方块；拖到空地不消耗行动点。');draw();}else performSwap(active.first,target.id);}else{say('只能拖动己方非核心方块进行置换。');draw();}}else clickCell(targetIndex);});
-canvas.addEventListener('pointercancel',cancelDrag);canvas.addEventListener('lostpointercapture',()=>{if(drag)cancelDrag();});
-$('minimap').addEventListener('click',e=>{if(s.dead||s.settled)return;const box=$('minimap').getBoundingClientRect(),x=(e.clientX-box.left)*100/box.width,y=(e.clientY-box.top)*100/box.height;let best=null,distance=5;for(const t of cores(s,'p')){const i=coreIndex(s,t.id),d=Math.hypot(i%N+.5-x,Math.floor(i/N)+.5-y);if(d<distance){best=t;distance=d;}}if(best)switchCore(best.id);});
+    rect(p.x - half, p.y - half, size, size, rad, null, stroke);
+  }
+  function draw() {
+    if (!s) return;
+    const q = preview?.q || s,
+      cam = camera(q),
+      links = connected(q);
+    ctx.clearRect(0, 0, 860, 860);
+    ctx.fillStyle = '#111d18';
+    ctx.fillRect(0, 0, 860, 860);
+    for (let r = 0; r < V; r++)
+      for (let c = 0; c < V; c++) {
+        const i = (r + cam.r) * N + c + cam.c,
+          p = screenPoint(i, cam);
+        rect(p.x - C / 2 + 1, p.y - C / 2 + 1, C - 2, C - 2, 3, '#1c2a21', '#293b2d');
+      }
+    for (let c = 0; c < V; c++) {
+      text(cam.c + c + 1, X + c * C + C / 2, Y - 9, 8, '#6d8966');
+      text(cam.r + c + 1, X - 12, Y + c * C + C / 2, 8, '#6d8966');
+    }
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#bada9366';
+    for (const i of links) {
+      if (!visible(i, cam)) continue;
+      for (const d of ['right', 'down']) {
+        const j = neighbor(i, d);
+        if (links.has(j) && visible(j, cam)) {
+          const a = screenPoint(i, cam),
+            b = screenPoint(j, cam);
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.lineWidth = 1;
+    for (let r = cam.r; r < cam.r + V; r++)
+      for (let c = cam.c; c < cam.c + V; c++) {
+        const i = r * N + c,
+          t = q.g[i];
+        if (!t) continue;
+        const p = screenPoint(i, cam),
+          isPlayer = t.side === 'p',
+          member = links.has(i);
+        let fill = t.support
+          ? t.structure
+            ? '#96c5e5'
+            : '#b5d4e6'
+          : t.side === 'e'
+            ? t.core
+              ? '#e8a28c'
+              : '#edb8a5'
+            : t.side === 'n'
+              ? t.nc
+                ? '#e4d4a8'
+                : '#bdc7ad'
+              : t.core
+                ? '#f0d18e'
+                : member
+                  ? '#c5e29c'
+                  : '#abd5dd';
+        if (t.side === 'p' && !t.core && t.hp < t.cap) {
+          const hr = t.hp / t.cap;
+          fill = hr > HP_HURT ? HP_COL_OK : hr > HP_CRIT ? HP_COL_HURT : HP_COL_CRIT;
+        }
+        tileBody(
+          p,
+          14,
+          28,
+          4,
+          fill,
+          t.core ? '#efc97a' : t.side === 'e' ? '#b96c5e' : t.side === 'n' ? '#51604c' : member ? '#7dab6b' : '#6fa7b2',
+          t,
+        );
+        text(
+          fmt(t.n),
+          p.x,
+          p.y + (t.core ? -1 : -3),
+          fmt(t.n).length > 4 ? 8 : fmt(t.n).length > 3 ? 10 : fmt(t.n).length > 2 ? 13 : 17,
+          digitColor(t.n),
+        );
+        if (t.core || t.structure)
+          text(
+            t.structure
+              ? '▣'
+              : t.side === 'e'
+                ? { fighter: '▲', bunker: '▣', collector: '⚒' }[t.kind] || '◆'
+                : t.id === q.primary && !q.primaryLost
+                  ? '✣'
+                  : '◇',
+            p.x,
+            p.y - 10,
+            7,
+            t.side === 'e' ? '#693325' : '#685027',
+          );
+        if (t.side === 'p' && !t.support) {
+          const th = absorbThreshold(q),
+            bx = p.x - 11,
+            by = p.y + 8,
+            bw = 22,
+            bh = 4;
+          if (t.n > th) {
+            rect(bx, by, bw, bh, 2, '#7f8f7f', null);
+          } else {
+            rect(bx, by, bw, bh, 2, '#0d1512', null);
+            const pr = Math.max(0, Math.min(1, (t.payload || 0) / t.n));
+            if (pr > 0) rect(bx, by, Math.max(2, Math.round(bw * pr)), bh, 2, '#c8f195', null);
+          }
+        }
+        if (t.id === selected) {
+          ctx.lineWidth = 2;
+          rect(p.x - 15, p.y - 15, 30, 30, 5, null, '#effbd4');
+          ctx.lineWidth = 1;
+        }
+      }
+    paintOutlines(q, cam);
+    if (preview) {
+      const oldLinks = connected(s);
+      for (let vr = 0; vr < V; vr++)
+        for (let vc = 0; vc < V; vc++) {
+          const i = (cam.r + vr) * N + cam.c + vc;
+          if (JSON.stringify(q.g[i]) === JSON.stringify(s.g[i])) continue;
+          const t = q.g[i],
+            p = screenPoint(i, cam),
+            old = t ? s.g.findIndex((a) => a?.id === t.id) : -1;
+          let color = '#effbd4';
+          if (t?.side === 'p' && old >= 0 && oldLinks.has(old) && !links.has(i)) color = '#f1a373';
+          if (t?.core && t.side === 'p' && !s.g.some((a) => a?.core && a.id === t.id)) color = '#d5a1f5';
+          ctx.lineWidth = 2;
+          rect(p.x - 15, p.y - 15, 30, 30, 4, null, color);
+          ctx.lineWidth = 1;
+        }
+    }
+    const now = performance.now(),
+      DUR = { shot: 450, absorb: 420, pulse: 480, hit: 600, kill: 520, regen: 640 };
+    effects = effects.filter((f) => now - f.start < (DUR[f.kind || 'shot'] || 450));
+    if (!preview) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(X, Y - 18, 800, 818);
+      ctx.clip();
+      for (const f of effects) {
+        const k = f.kind || 'shot',
+          age = Math.min(1, (now - f.start) / (DUR[k] || 450)),
+          fade = 1 - age;
+        if (k === 'shot') {
+          if (!visible(f.from, cam) && !visible(f.to, cam)) continue;
+          const a = screenPoint(f.from, cam),
+            b = screenPoint(f.to, cam);
+          ctx.globalAlpha = fade * 0.8;
+          ctx.strokeStyle = f.side === 'e' ? '#ff9879' : '#d6ef9a';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+          continue;
+        }
+        if (k === 'absorb') {
+          if (!visible(f.from, cam) && !visible(f.to, cam)) continue;
+          const o = screenPoint(f.from, cam),
+            e = screenPoint(f.to, cam);
+          ctx.globalAlpha = fade * 0.8;
+          ctx.strokeStyle = '#c8f195';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(o.x, o.y);
+          ctx.lineTo(e.x, e.y);
+          ctx.stroke();
+          ctx.globalAlpha = fade;
+          ctx.fillStyle = '#e6ff9c';
+          ctx.beginPath();
+          ctx.arc(o.x + (e.x - o.x) * age, o.y + (e.y - o.y) * age, 2.5, 0, 6.2832);
+          ctx.fill();
+          continue;
+        }
+        if (!visible(f.at, cam)) continue;
+        const p = screenPoint(f.at, cam);
+        if (k === 'pulse') {
+          ctx.globalAlpha = fade * 0.9;
+          ctx.strokeStyle = '#e6ff9c';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 6 + 18 * age, 0, 6.2832);
+          ctx.stroke();
+        } else if (k === 'regen') {
+          ctx.globalAlpha = fade * 0.7;
+          ctx.strokeStyle = '#8fd98a';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 10 + 12 * age, 0, 6.2832);
+          ctx.stroke();
+        } else if (k === 'hit') {
+          ctx.globalAlpha = fade * 0.75;
+          ctx.fillStyle = '#ff6b5a';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 13, 0, 6.2832);
+          ctx.fill();
+          if (f.dmg) {
+            ctx.globalAlpha = fade;
+            text('-' + f.dmg, p.x, p.y - 16 - 14 * age, 10, '#ffd7cf');
+          }
+        } else if (k === 'kill') {
+          ctx.globalAlpha = fade * 0.9;
+          ctx.strokeStyle = '#c9d3c3';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 8 + 22 * age, 0, 6.2832);
+          ctx.stroke();
+          ctx.globalAlpha = fade * 0.55;
+          ctx.strokeStyle = '#e8f0dd';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(p.x - 9, p.y - 9);
+          ctx.lineTo(p.x + 9, p.y + 9);
+          ctx.moveTo(p.x + 9, p.y - 9);
+          ctx.lineTo(p.x - 9, p.y + 9);
+          ctx.stroke();
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+    paintDrag(q, cam);
+  }
+  function indexFromEvent(e) {
+    const box = canvas.getBoundingClientRect(),
+      x = ((e.clientX - box.left) * 860) / box.width,
+      y = ((e.clientY - box.top) * 860) / box.height,
+      c = Math.floor((x - X) / C),
+      r = Math.floor((y - Y) / C),
+      cam = camera(s);
+    return r >= 0 && r < V && c >= 0 && c < V ? (r + cam.r) * N + c + cam.c : -1;
+  }
+  function inspect(i) {
+    if (i < 0 || (inspectedState === s && inspectedIndex === i)) return;
+    inspectedState = s;
+    inspectedIndex = i;
+    const t = s.g[i];
+    if (!t) {
+      $('inspect').textContent = `${Math.floor(i / N) + 1}行 ${(i % N) + 1}列 · 空地`;
+      return;
+    }
+    const label = t.support
+      ? '友方支援碉堡'
+      : t.side === 'n'
+        ? '中立'
+        : t.side === 'e'
+          ? '敌方' + kindName[(t.core ? t : teamCore(s, t.team))?.kind || 'squad']
+          : connected(s).has(i)
+            ? '己方主体'
+            : '其他己方';
+    $('inspect').textContent =
+      `${Math.floor(i / N) + 1}行 ${(i % N) + 1}列 · ${label}${t.core ? '核心' : '数字'} ${t.n}。${t.side === 'n' ? (t.nc ? '中立密集区：' + s.g.filter((u) => u?.side === 'n' && u.nc === t.nc).length + '块。' : '散落中立数字；四向连通达到3块即形成密集区。') : `core=${coreValue(s, t)}${t.support ? '（独立建筑）' : ''}，血量 ${t.hp}/${t.cap}，伤害 ${damage(s, t)}，射程8格。${t.side === 'p' && !t.support ? (t.hp < t.cap ? '受伤中：累积 ' + (t.payload || 0) + ' 每回合转为回血（成长暂停）' : '吸收上限 ' + ABSORB_CAP + '（' + (t.n >= ABSORB_CAP ? '已达上限，不再吸收' : '可吸收 · 累积 ' + (t.payload || 0)) + '）') : ''}${t.side === 'e' && t.core ? '编队 ' + s.g.filter((u) => u?.side === 'e' && u.team === t.team).length + '/' + desiredSize(t) + ' 块。' : ''}`}${t.core && t.side === 'p' ? '点击切换核心与视野。' : ''}`;
+  }
+  function inputBlocked() {
+    return (
+      s.dead ||
+      s.settled ||
+      $('goalDialog').open ||
+      $('dialog').open ||
+      $('guideDialog').open ||
+      $('tutorialDialog').open ||
+      $('techDialog').open
+    );
+  }
+  function cancelDrag() {
+    const active = drag;
+    drag = null;
+    if (active && canvas.hasPointerCapture(active.pointerId)) canvas.releasePointerCapture(active.pointerId);
+    canvas.style.cursor = 'default';
+    draw();
+  }
+  function clickCell(i) {
+    const t = s.g[i];
+    if (t?.side === 'p' && t.core) {
+      switchCore(t.id);
+      return;
+    }
+    if (t?.side === 'p' && t.support) {
+      selected = null;
+      mode = 'main';
+      ui();
+      say('固定支援碉堡：自动攻击，不可移动、置换或合并，不计入存活核心。');
+      return;
+    }
+    if (t?.side === 'p') {
+      if (selected === t.id && mode === 'extra') {
+        setMode('main');
+        return;
+      }
+      selected = t.id;
+      mode = 'extra';
+      ui();
+      say(`已选中 ${fmt(t.n)} · 方向键单块移动；拖动到另一己方非核心数字可置换。`);
+    } else {
+      selected = null;
+      mode = 'main';
+      ui();
+      say(
+        t?.side === 'e'
+          ? '敌方不能直接操作。已返回主体移动。'
+          : t
+            ? '中立数字不能直接操作。已返回主体移动。'
+            : '已取消选择，方向键控制当前主体。',
+      );
+    }
+  }
+  canvas.addEventListener('pointerdown', (e) => {
+    if (inputBlocked() || !e.isPrimary || e.button !== 0) return;
+    e.preventDefault();
+    preview = null;
+    const i = indexFromEvent(e),
+      t = s.g[i];
+    drag = {
+      pointerId: e.pointerId,
+      start: i,
+      first: t?.side === 'p' && !t.core && !t.support ? t.id : null,
+      startX: e.clientX,
+      startY: e.clientY,
+      moved: false,
+      over: i,
+      x: 0,
+      y: 0,
+    };
+    canvas.setPointerCapture(e.pointerId);
+    canvas.focus({ preventScroll: true });
+    draw();
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    inspect(indexFromEvent(e));
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) >= 6) drag.moved = true;
+    drag.over = indexFromEvent(e);
+    const box = canvas.getBoundingClientRect();
+    drag.x = ((e.clientX - box.left) * 860) / box.width;
+    drag.y = ((e.clientY - box.top) * 860) / box.height;
+    if (drag.moved && drag.first) {
+      canvas.style.cursor = 'grabbing';
+      draw();
+    }
+  });
+  canvas.addEventListener('pointerup', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    const active = drag,
+      targetIndex = indexFromEvent(e);
+    drag = null;
+    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+    canvas.style.cursor = 'default';
+    if (inputBlocked()) {
+      draw();
+      return;
+    }
+    if (active.moved) {
+      if (active.first) {
+        const target = s.g[targetIndex];
+        if (targetIndex < 0) {
+          say('拖动已取消：只能在当前视野内置换。');
+          draw();
+        } else if (!target) {
+          say('置换目标必须是己方非核心方块；拖到空地不消耗行动点。');
+          draw();
+        } else performSwap(active.first, target.id);
+      } else {
+        say('只能拖动己方非核心方块进行置换。');
+        draw();
+      }
+    } else clickCell(targetIndex);
+  });
+  canvas.addEventListener('pointercancel', cancelDrag);
+  canvas.addEventListener('lostpointercapture', () => {
+    if (drag) cancelDrag();
+  });
+  $('minimap').addEventListener('click', (e) => {
+    if (s.dead || s.settled) return;
+    const box = $('minimap').getBoundingClientRect(),
+      x = ((e.clientX - box.left) * 100) / box.width,
+      y = ((e.clientY - box.top) * 100) / box.height;
+    let best = null,
+      distance = 5;
+    for (const t of cores(s, 'p')) {
+      const i = coreIndex(s, t.id),
+        d = Math.hypot((i % N) + 0.5 - x, Math.floor(i / N) + 0.5 - y);
+      if (d < distance) {
+        best = t;
+        distance = d;
+      }
+    }
+    if (best) switchCore(best.id);
+  });
 

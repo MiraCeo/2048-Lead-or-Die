@@ -95,8 +95,16 @@ def main():
             continue
         body = read_module(path, header_lines)
         if len(body) != m['lines']:
-            problems.append('%s: 正文 %d 行，清单记 %d 行'
-                            % (name, len(body), m['lines']))
+            # manifest 里的 lines 是**阶段 2 拆分时**的记录。阶段 4 格式化后
+            # 模块行数必然改变，所以这只是一条装饰性元数据，不构成失败条件。
+            msg = ('%s: 正文 %d 行，清单记 %d 行'
+                   % (name, len(body), m['lines']))
+            if ALLOW_DIVERGE:
+                print('  %-14s %4d 行  (清单记 %d，已允许分叉)'
+                      % (name, len(body), m['lines']))
+                out_lines.extend(body)
+                continue
+            problems.append(msg)
         out_lines.extend(body)
         print('  %-14s %4d 行  (原 %d\u2013%d)' % (name, len(body), m['start'], m['end']))
 

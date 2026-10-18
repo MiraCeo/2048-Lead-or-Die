@@ -35,6 +35,90 @@ const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
 const ENGINE = fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8');
+
+// 源码层断言助手：忽略**所有空白**再比对。
+// 原因：断言检查的是实现约束（如"进度条 22×4"），而 prettier 会加空格，
+// 用裸 includes 会因排版差异误报。归一化后断言表达的是"语义在场"，与排版无关。
+const _sq = (v) => String(v).replace(/\s+/g, '');
+function has(src, pat) {
+  const found = _sq(src).includes(_sq(pat));
+  if (!found) console.log('        [has] 未找到（归一化后）: ' + pat);
+  return found;
+}
+function notHas(src, pat) {
+  const found = _sq(src).includes(_sq(pat));
+  if (found) console.log('        [notHas] 不该存在但找到了（归一化后）: ' + pat);
+  return !found;
+}
+// 需要时用：prettier 除了加空白，还会给箭头函数参数与返回表达式**补括号**
+// （`f=>x` -> `(f) => (x)`、`a||b` -> `(a || b)`）。
+// 括号是结构变化，空白归一化处理不了。
+//
+// 实现要点：**剥括号必须按深度匹配，不能靠正则** ——
+// `(DUR[f.kind || 'shot'] || 450)` 里的内层 `||` 会被 `\(([^()]*\|\|[^()]*)\)`
+// 这类正则误抓。所以手写扫描器：跳过字符串、按深度找匹配右括号、
+// 只在最外层剥离、递归下降。字符串内的括号（如 `'k===\'x\''`）也不能当作结构括号。
+function stripParens(s) {
+  const n = s.length;
+  const matchClose = (openIdx) => {
+    let d = 1;
+    for (let k = openIdx + 1; k < n; k++) {
+      const c = s[k];
+      if (c === "'" || c === '"' || c === '`') {
+        k++;
+        while (k < n) {
+          if (s[k] === '\\') { k += 2; continue; }
+          if (s[k] === c) break;
+          k++;
+        }
+        continue;
+      }
+      if (c === '(') d++;
+      else if (c === ')') { d--; if (d === 0) return k; }
+    }
+    return -1;
+  };
+  let i = 0;
+  while (i < n) {
+    const c = s[i];
+    if (c === "'" || c === '"' || c === '`') {
+      i++;
+      while (i < n) {
+        if (s[i] === '\\') { i += 2; continue; }
+        if (s[i] === c) { i++; break; }
+        i++;
+      }
+      continue;
+    }
+    if (c === '(') {
+      const j = matchClose(i);
+      if (j > i) {
+        const raw = s.slice(i + 1, j);
+        // 只在括号内容**明显冗余**时才剥（保守白名单）。
+        // 反例：`f('(a)')` 的括号是函数调用的，绝不能剥成 `f'(a)'`（自测发现的）。
+        const safe = raw !== '' &&
+          !raw.includes(',') && !raw.includes(';') && raw !== ')' &&
+          !(raw[0] === "'" || raw[0] === '"' || raw[0] === '`');
+        if (safe) {
+          const inner = stripParens(raw);
+          s = s.slice(0, i) + inner + s.slice(j + 1);
+          i += inner.length;
+          continue;
+        }
+      }
+    }
+    i++;
+  }
+  return s;
+}
+function hasLoose(src, pat) {
+  // 两件事都要做：先剥掉 prettier 补的括号，再抹平空白差异。
+  // 少了任何一步都会漏 —— 实测漏掉 _sq 时会因源文本里的空格而匹配失败。
+  const found = _sq(stripParens(src)).includes(_sq(stripParens(pat)));
+  if (!found) console.log('        [hasLoose] 未找到: ' + pat);
+  return found;
+}
+
 vm.runInThisContext(ENGINE);
 const G = globalThis.__CF__;
 const P = (r, c) => r * 100 + c;
@@ -133,10 +217,10 @@ console.log('\n=== E. 摧毁与受击 ===');
 
 console.log('\n=== F. 通道是"可选传入"：模拟调用不产生特效 ===');
 {
-  check(ENGINE.includes("if(fx){fx.push({kind:'hit'"), '受击事件被 if(fx) 守卫');
-  check(ENGINE.includes("if(fx)fx.push({kind:'kill'"), '摧毁事件被 if(fx) 守卫');
-  check(ENGINE.includes("if(fx)fx.push({kind:'absorb'"), '吸收事件被 if(fx) 守卫');
-  check(!ENGINE.includes('fxBuf') && !ENGINE.includes('simDepth'),
+  check(has(ENGINE, "if(fx){fx.push({kind:'hit'"), '受击事件被 if(fx) 守卫');
+  check(has(ENGINE, "if(fx)fx.push({kind:'kill'"), '摧毁事件被 if(fx) 守卫');
+  check(has(ENGINE, "if(fx)fx.push({kind:'absorb'"), '吸收事件被 if(fx) 守卫');
+  check(notHas(ENGINE, 'fxBuf') && notHas(ENGINE, 'simDepth'),
         '没有引入全局缓冲或"是否在模拟"的标志位');
 
   // 同一场对碰：传 fx 有事件，不传就没有可观察的事件通道
@@ -188,12 +272,12 @@ console.log('\n=== H. 渲染与时长表 ===');
   let threw = null;
   try { G.draw(); } catch (e) { threw = e; }
   check(!threw, 'draw() 不抛错', threw ? threw.message : '');
-  check(ENGINE.includes('DUR={shot:450,absorb:420,pulse:480,hit:600,kill:520,regen:640}'),
+  check(has(ENGINE, 'DUR={shot:450,absorb:420,pulse:480,hit:600,kill:520,regen:640}'),
         '六类特效各有自己的时长');
   for (const k of ['absorb', 'pulse', 'regen', 'hit', 'kill']) {
-    check(ENGINE.includes(`k==='${k}'`), `渲染分支在场：${k}`);
+    check(has(ENGINE, `k==='${k}'`), `渲染分支在场：${k}`);
   }
-  check(ENGINE.includes("effects=effects.filter(f=>now-f.start<(DUR[f.kind||'shot']||450))"),
+  check(hasLoose(ENGINE, "effects=effects.filter(f=>now-f.start<(DUR[f.kind||'shot']||450))"),
         '过期特效按各自时长清理（没有另起动画循环）');
 }
 
