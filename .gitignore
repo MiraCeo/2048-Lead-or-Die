@@ -15,3 +15,16 @@ __pycache__/
 # 失败的 headless Chrome 残留（沙箱内起不来，见项目文档 §14.7 第 1 条）
 /build/chrome-profile*/
 /build/cp3/
+
+# 差异测试的临时产物。
+# **必须保留** build/difftest/base.{manifest.json,turns.jsonl} —— 它是重构前的
+# 行为基线，是 `tools/difftest.js --assert-same` 的判据，丢了就无法证明重构等价。
+# 其余（变异引擎副本、自校验与临时运行）都是一次性产物：
+#   - mutants/ 是 tools/mutate.js 生成的 210KB 引擎副本，用于反向验证工具有效性
+#   - 运行输出可随时用 --out 其它名字重跑
+/build/difftest/mutants/
+/build/difftest/selfcheck.*
+/build/difftest/det-*.json
+/build/difftest/det-*.jsonl
+/build/difftest/mut*.json
+/build/difftest/mut*.jsonl
