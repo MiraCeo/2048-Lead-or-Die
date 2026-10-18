@@ -1604,27 +1604,54 @@
     $('modeLabel').textContent = mode === 'main' ? '主体移动 · 键盘操作' : '单块调整 · Esc 返回主体';
     const cam = camera(s);
     $('targetCount').textContent = `视野 行 ${cam.r + 1}–${cam.r + V} / 列 ${cam.c + 1}–${cam.c + V}`;
+    // 舰队列表：只有一支时不必摆按钮，收成一行；多支才列出可切换的核心。
+    // （不同的核心才需要切换，一支时把 44px 高的按钮换成一行摘要。）
+    const cores0 = cores(s, 'p');
+    const activeCore = cores0.find((t) => t.id === s.active);
+    const roleOf = (t) => (t.id === s.primary && !s.primaryLost ? '主' : '分');
+    $('fleetSummary').textContent =
+      cores0.length <= 1
+        ? cores0.length === 1
+          ? `仅一支：${roleOf(cores0[0])}核心 ${fmt(cores0[0].n)} · 无需切换`
+          : '没有己方核心'
+        : `${cores0.length} 支舰队 · 当前 ${activeCore ? roleOf(activeCore) + '核心 ' + fmt(activeCore.n) : '—'} · 点击切换`;
     $('fleets').replaceChildren(
-      ...cores(s, 'p').map((t) => {
-        const b = document.createElement('button'),
-          i = coreIndex(s, t.id);
-        b.textContent =
-          (t.id === s.active ? '● ' : '○ ') +
-          (t.id === s.primary && !s.primaryLost ? '主 ' : '分 ') +
-          t.n +
-          ' 核心 · ' +
-          (Math.floor(i / N) + 1) +
-          ',' +
-          ((i % N) + 1);
-        b.onclick = () => {
-          switchCore(t.id);
-          canvas.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
-        return b;
-      }),
+      ...(cores0.length <= 1
+        ? []
+        : cores0.map((t) => {
+            const b = document.createElement('button'),
+              i = coreIndex(s, t.id);
+            b.textContent =
+              (t.id === s.active ? '● ' : '○ ') +
+              roleOf(t) +
+              ' ' +
+              t.n +
+              ' 核心 · ' +
+              (Math.floor(i / N) + 1) +
+              ',' +
+              ((i % N) + 1);
+            b.onclick = () => {
+              switchCore(t.id);
+              canvas.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            return b;
+          })),
     );
-    $('log').replaceChildren(
-      ...s.logs.map((t) => {
+    // 战报：默认只显示最近几条，完整历史点开看（数据一条不少，只是默认收起）。
+    const LOG_PREVIEW = 3;
+    const logBox = $('log');
+    const logSum = $('logSummary');
+    if (logSum) {
+      const all = s.logs || [];
+      const cnt = (pre) => all.filter((l) => l.startsWith(pre)).length;
+      logSum.textContent =
+        all.length <= LOG_PREVIEW
+          ? `共 ${all.length} 条 · 已全部显示`
+          : `最近 ${LOG_PREVIEW} 条 / 共 ${all.length} 条 · 点击展开` +
+            `（增援 ${cnt('全图增援')} · 遭遇战 ${cnt('血量对碰')} · 核心被毁 ${cnt('己方核心') + cnt('敌方核心')}）`;
+    }
+    logBox.replaceChildren(
+      ...s.logs.slice(0, LOG_PREVIEW).map((t) => {
         const d = document.createElement('div');
         d.textContent = t;
         return d;

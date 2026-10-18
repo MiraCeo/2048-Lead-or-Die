@@ -170,5 +170,35 @@ console.log('\n=== 核心从血量配色中排除 ===');
   check(has(ENGINE, "if(t.side==='p'&&!t.core&&t.hp<t.cap)"), '核心不再参与血量配色');
 }
 
+console.log('\n=== 舰队列表：只有一支时收缩成一行 ===');
+{
+  check(has(HTML, 'id="fleetSummary"'), '舰队摘要元素在场');
+  // 只有一支时不应渲染切换按钮（返回空数组）
+  check(has(ENGINE, 'cores0.length <= 1 ? [] : cores0.map'),
+        '只有一支时不渲染切换按钮');
+  // 一支时给出"无需切换"的明确文案，而不是留空
+  check(has(ENGINE, '无需切换'), '一支时显示「无需切换」');
+  // 多支时仍保留切换入口（不因收缩而丢功能）
+  check(has(ENGINE, "b.onclick = () => {") && has(ENGINE, 'switchCore(t.id)'),
+        '多支时仍可切换核心（功能未丢）');
+  // 摘要恒有内容 —— 一支/多支/无核心三种都要有文案
+  const branches = (ENGINE.match(/cores0\.length <= 1/g) || []).length;
+  check(branches >= 1, '按核心数量分支渲染', `branch=${branches}`);
+}
+
+console.log('\n=== 战报：默认只显示几条，可展开 ===');
+{
+  check(has(HTML, '<details class="log-wrap">'), '战报用 <details> 折叠容器');
+  check(has(HTML, 'id="logSummary"'), '折叠容器有摘要');
+  check(has(HTML, 'id="log"'), '完整战报容器仍在（数据一条不少）');
+  check(has(ENGINE, 'const LOG_PREVIEW = 3'), '默认只显示 3 条');
+  // 关键：渲染的是 slice(0, LOG_PREVIEW)，不是全部
+  check(has(ENGINE, 's.logs.slice(0, LOG_PREVIEW)'),
+        '渲染走 slice(0, LOG_PREVIEW)，没有退回整表');
+  check(notHas(ENGINE, '...s.logs.map('), '旧的全量渲染已移除');
+  // 摘要要给出真实总数，让玩家知道被折叠了多少
+  check(has(ENGINE, '共 ${all.length} 条'), '摘要报告总条数');
+}
+
 console.log(`\n${failures} 项失败`);
 process.exit(failures ? 1 : 0);
