@@ -82,7 +82,11 @@ for pat, label in [
     ('min-height:0', '允许 flex 子项收缩（不加就还是会顶出去）'),
     ('footer{flex:00auto}', '页脚常驻底部 → 最下面的提示永远同屏'),
     ('.layout>aside{min-height:0;overflow-y:auto', '左右栏内部滚动，不顶整页'),
-    ('.map-keyhint:empty{min-height:0', '空预览位不再白占 28px'),
+    # 空预览位不占高度：v0.1.5 起预览位移到页脚，用**绝对定位浮层**实现
+    # （`.status-overlay{position:absolute}` 完全不占布局高度，比原来靠 :empty 收回 28px 更彻底）。
+    # 原来断言 `.map-keyhint:empty{min-height:0}` —— 那条类已随结构删除，断言同步改为新机制。
+    ('footer.status-overlay{position:absolute', '预览/反馈是绝对定位浮层（零布局高度）'),
+    ('footer#previewHint:not(:empty){opacity:1}', '空预览位不可见、有内容才显示'),
 ]:
     check(pat in rules_flat, label)
 
@@ -149,6 +153,64 @@ for sz in SIZES:
         print('  报告  %-10s 视口仅 %dpx：侧栏溢出 左 %+d / 右 %+d'
               '（内容高度固定，矮屏必然栏内滚动；页面本身仍不滚动）'
               % (sz, vh, lv, rv))
+
+print()
+print('=== 死 CSS：markup 已删除的元素不该还留着样式 ===')
+# 只取 <style>…</style> 之间的内容：否则 `<style>` 标签本身（以 > 结尾+换行）
+# 会被"悬空选择器"正则误匹配。
+_ss = html.find('<style>') + len('<style>')
+_se = html.find('</style>')
+css_raw = html[_ss:_se]
+# 再剥掉注释 —— 注释里提到旧类名是"演进记录"，不是残留
+# （第一版没剥，把注释里的 `.map-keyhint ` 误报成"仍在使用"）。
+css_only = re.sub(r'/\*.*?\*/', '', css_raw, flags=re.S)
+markup_part = html[html.find('<body>'):]
+for cls in ('brand', 'en', 'badge', 'header-actions', 'play-heading',
+            'map-actions', 'map-keyhint', 'topbar'):
+    styles = re.search(r'\.' + re.escape(cls) + r'[{, :]', css_only)
+    used = ('class="' + cls) in markup_part
+    check(styles is None or used,
+          '%-16s %s' % (cls, '已移除' if styles is None else '仍在使用'))
+check('<header' not in html, 'header 元素已删除')
+# 选择器不得悬空：删除规则时若只匹配了复合选择器的后半截，会留下 `.shell>` 这种碎片，
+# 而它仍能解析成合法 CSS（只是永远不匹配），静默失效。
+dangling = [m.group(0) for m in re.finditer(r'[^{}\n]*[>,]\n', css_only)]
+check(not dangling, '无悬空选择器片段（删除规则时未切断复合选择器）',
+      str(dangling[:2]) if dangling else '')
+
+# ---- 两处"写了没生效/遮住内容"的定点校验（v0.1.6）----
+print()
+print('=== 浮层不遮列号 + navbtns 真正贴底 ===')
+r = subprocess.run([sys.executable, str(HERE / 'shot.py'), '--metrics', '--size', '1600x900'],
+                   cwd=PATHS.ROOT, capture_output=True, text=True,
+                   encoding='utf-8', errors='replace')
+o = r.stdout
+
+
+def g1(pat):
+    m = re.search(pat, o)
+    return int(m.group(1)) if m else -1
+
+
+cv_y, cv_h = g1(r'canvas#canvas:\s*x=\d+\s*y=(\d+)\s*w=\d+\s*h=(\d+)'), g1(r'canvas#canvas:\s*x=\d+\s*y=\d+\s*w=\d+\s*h=(\d+)')
+act_bottom = g1(r'\.board-actions:\s*x=\d+\s*y=\d+\s*w=\d+\s*h=(\d+)')
+act_y = g1(r'\.board-actions:\s*x=\d+\s*y=(\d+)')
+aside_bottom = g1(r'aside\.left:\s*x=\d+\s*y=\d+\s*w=\d+\s*h=(\d+)')
+aside_y = g1(r'aside\.left:\s*x=\d+\s*y=(\d+)')
+nav_y = g1(r'\.navbtns:\s*x=\d+\s*y=(\d+)')
+nav_h = g1(r'\.navbtns:\s*x=\d+\s*y=\d+\s*w=\d+\s*h=(\d+)')
+
+if cv_y > 0 and act_y > 0:
+    covered = (act_y + act_bottom) - cv_y
+    # 列号标签绘制在 43/860 处（canvas 内坐标），换算成像素
+    label_px = round(cv_h * 34 / 860)
+    check(covered <= label_px,
+          '浮层覆盖画布顶部 %dpx，列号标签在 %dpx 处 → %s'
+          % (covered, label_px, '列号可见' if covered <= label_px else '**列号被遮**'))
+
+if aside_y > 0 and nav_y > 0:
+    gap = (aside_y + aside_bottom) - (nav_y + nav_h)
+    check(gap <= 16, 'navbtns 距左栏底部 %dpx（应 ≤16，否则 margin-top:auto 没生效）' % gap)
 
 print()
 print('%d 项失败' % len(fails))
