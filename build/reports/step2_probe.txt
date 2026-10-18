@@ -1,0 +1,21 @@
+insertion anchor: 'if(!q.dead)growFighters(q);'
+count in src/main.script.js   : 1
+count in src/tutorial.patches.py : 2
+
+anchor for the new function block: 'function growFighters(q){'
+count in src/main.script.js   : 1
+
+==========================================================================================
+patch performSwap@main[79:80]  [OLD] worldStep  (1263 chars in body)
+==========================================================================================
+function worldStep(q,dir){if(q.dead||q.settled)return null;const r=moveMain(q,dir);if(!r)return null;q.turn++;const earned=q.turn%2===0?1:0;q.ap+=earned;if(!q.dead)growFighters(q);const fx=[];const playerShots=fire(q,'p',fx);let enemyShots=0,enemyMoves=0;if(!q.dead&&q.turn%2===0)enemyMoves=ai(q);if(!q.dead)enemyShots=fire(q,'e',fx,t=>q.turn%2===0||teamCore(q,t.team)?.kind==='bunker');let supply={inside:0,outside:0};if(!q.dead){normalize(q);if(q.turn%10===0)replenish(q);if(q.turn===q.nextWave)reinforce(q);if(q.turn>=(q.nextSupport??20)){spawnSupport(q);q.nextSupport=q.turn+20;}if(q.nextWave-q.turn===5){const spec=waveSpec(q.wave+1);log(q,`增援预告：5回合后，${Math.min(spec.count,enemySlots(q))} 个单位（最多6队），core=${spec.n}`);}supply=spawn(q);q.lastFocus=coreIndex(q)>=0?coreIndex(q):q.lastFocus;}log(q,`回合 ${q.turn} · 射击 ${playerShots}/${enemyShots} · 补给内${supply.inside}/外${supply.outside} · 行动点 +${earned}`);if(q.dead)log(q,'所有己方核心已失去，远征结束。');return{...r,earned,fx,playerShots,enemyShots,enemyMoves,supply};}
+
+
+  contains insertion anchor: True
+==========================================================================================
+patch performSwap@main[79:80]  [NEW] worldStep  (1731 chars in body)
+==========================================================================================
+function worldStep(q,dir){if(q.lesson!==undefined){if([2,6].includes(q.lesson))return null;const r=moveMain(q,dir);if(!r)return null;q.turn++;q.tutorialContacts=(q.tutorialContacts||0)+(r.contacts||0);const fx=[],shots=q.lesson===3&&!q.dead?fire(q,'p',fx):0;if(q.lesson===3&&!q.g.some(t=>t?.id===2)&&q.g.find(t=>t?.id===3)?.hp===81)q.tutorialShotDemo=true;return {...r,earned:0,fx,playerShots:shots,enemyShots:0,enemyMoves:0,supply:{inside:0,outside:0}};}if(q.dead||q.settled)return null;const r=moveMain(q,dir);if(!r)return null;q.turn++;const earned=q.turn%2===0?1:0;q.ap+=earned;if(!q.dead)growFighters(q);const fx=[];const playerShots=fire(q,'p',fx);let enemyShots=0,enemyMoves=0;if(!q.dead&&q.turn%2===0)enemyMoves=ai(q);if(!q.dead)enemyShots=fire(q,'e',fx,t=>q.turn%2===0||teamCore(q,t.team)?.kind==='bunker');let supply={inside:0,outside:0};if(!q.dead){normalize(q);if(q.turn%10===0)replenish(q);if(q.turn===q.nextWave)reinforce(q);if(q.turn>=(q.nextSupport??20)){spawnSupport(q);q.nextSupport=q.turn+20;}if(q.nextWave-q.turn===5){const spec=waveSpec(q.wave+1);log(q,`增援预告：5回合后，${Math.min(spec.count,enemySlots(q))} 个单位（最多6队），core=${spec.n}`);}supply=spawn(q);q.lastFocus=coreIndex(q)>=0?coreIndex(q):q.lastFocus;}log(q,`回合 ${q.turn} · 射击 ${playerShots}/${enemyShots} · 补给内${supply.inside}/外${supply.outside} · 行动点 +${earned}`);if(q.dead)log(q,'所有己方核心已失去，远征结束。');return{...r,earned,fx,playerShots,enemyShots,enemyMoves,supply};}
+
+
+  contains insertion anchor: True
