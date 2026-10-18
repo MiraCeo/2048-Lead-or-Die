@@ -48,7 +48,7 @@ class PATHS:
     # 交付物：单个自包含 HTML，位于仓库根，玩家双击即开。
     # ⚠️ 文件名被多个脚本与文档引用；改名时**只改这一处**，
     #    其余脚本一律走 PATHS.DELIVERABLE（这正是本次改造的目的之一）。
-    DELIVERABLE = ROOT / '2048小游戏-教程七关.html'
+    DELIVERABLE = ROOT / '尔领死吧-v0.1.0.html'
 
     # 步骤 0 的逐字节原始参照（历史快照，不要覆盖）
     ORIGINAL = REFERENCE / '2048.original.html'

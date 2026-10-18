@@ -14,7 +14,7 @@ Regenerate with:  python tools/derive_patches.py
 PATCHES = [
     {
         "name": "let tutorialStored='__TUTORIAL_SAVE_SEED@main[2:2]",
-        "old": "const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d'),N=100,V=25,C=32,X=30,Y=43,KEY='core-expedition-v10';const dirs={up:[-1,0],down:[1,0],left:[0,-1],right:[0,1]},copy=q=>({...q,g:q.g.map(t=>t?{...t}:null),logs:q.logs.slice()}),lvl=n=>Math.round(Math.log2(n));let s,history=[],mode='main',selected=null,preview=null,effects=[],drag=null;\n",
+        "old": "const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d'),N=100,V=25,C=32,X=30,Y=43,KEY='lead-or-die-v1';const dirs={up:[-1,0],down:[1,0],left:[0,-1],right:[0,1]},copy=q=>({...q,g:q.g.map(t=>t?{...t}:null),logs:q.logs.slice()}),lvl=n=>Math.round(Math.log2(n));let s,history=[],mode='main',selected=null,preview=null,effects=[],drag=null;\n",
         "new": "let tutorialStored='__TUTORIAL_SAVE_SEED__';\ntry{tutorialStored=tutorialStored?new TextDecoder().decode(Uint8Array.from(atob(tutorialStored),c=>c.charCodeAt(0))):null;}catch{tutorialStored=null;}\nconst tutorialStore={getItem:()=>tutorialStored,setItem:(key,value)=>{tutorialStored=value;parent.postMessage({type:'core-tutorial-save',value},'*');}};\n\nconst $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d'),N=100,V=11,C=64,X=78,Y=65,KEY='core-tutorial-v1';const dirs={up:[-1,0],down:[1,0],left:[0,-1],right:[0,1]},copy=q=>({...q,g:q.g.map(t=>t?{...t}:null),logs:q.logs.slice()}),lvl=n=>Math.round(Math.log2(n));let s,history=[],mode='main',selected=null,preview=null,effects=[],drag=null;\n",
     },
     {
@@ -74,7 +74,7 @@ PATCHES = [
     },
     {
         "name": 'tutorialInitial@main[130:130]',
-        "old": "try{const current=localStorage.getItem(KEY),data=JSON.parse(current||localStorage.getItem('core-expedition-v8'));if(data&&valid(data.s)){s=data.s;history=decodeHistory(data);neutralClusters(s);for(const prior of history)neutralClusters(prior);if(!current){s.nextSupport=(Math.floor(s.turn/20)+1)*20;neutralClusters(s);const main=s.g.find(t=>t?.side==='p'&&t.core&&t.id===s.primary);if(main&&!s.primaryLost)main.n=Math.max(8,main.n);for(const t of cores(s,'e')){t.n=Math.max(8,t.n);if(t.kind==='fighter')t.nextGrowth=s.turn+40;}rescale(s);history=[];save();}ui();say(current?'已恢复远征存档。':'已导入旧进度，启用对碰与友方碉堡支援；旧撤销历史已清空，原存档保留。');}else reset();}catch{reset();}function frame(){if(effects.length)draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);\n",
+        "old": "try{const current=localStorage.getItem(KEY),data=JSON.parse(current);if(data&&valid(data.s)){s=data.s;history=decodeHistory(data);neutralClusters(s);for(const prior of history)neutralClusters(prior);ui();say('已恢复远征存档。');}else reset();}catch{reset();}function frame(){if(effects.length)draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);\n",
         "new_file": 'tutorial.lessons.js',
     },
 ]

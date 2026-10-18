@@ -10,6 +10,7 @@ const vm = require('vm');
 const path = require('path');
 // 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
 const ROOT = path.resolve(__dirname, '..');
+const { DELIVERABLE } = require('./_root.js');
 
 const MODE = process.argv[2] || 'engine';
 
@@ -50,7 +51,7 @@ function installStubs() {
 }
 
 function readDeliverable() {
-  return fs.readFileSync(path.join(ROOT, '2048小游戏-教程七关.html'), 'utf8');
+  return fs.readFileSync(path.join(ROOT, DELIVERABLE), 'utf8');
 }
 
 function extractTutorialScript(html) {

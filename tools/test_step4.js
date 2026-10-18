@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 // 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
 const ROOT = path.resolve(__dirname, '..');
+const { DELIVERABLE } = require('./_root.js');
 const vm = require('vm');
 
 let failures = 0;
@@ -217,7 +218,7 @@ console.log('\n=== H. invariants over a full game ===');
 // ---------------------------------------------------------------------------
 console.log('\n=== I. the tech panel is wired into the deliverable and is safe ===');
 {
-  const html = fs.readFileSync(path.join(ROOT, '2048小游戏-教程七关.html'), 'utf8');
+  const html = fs.readFileSync(path.join(ROOT, DELIVERABLE), 'utf8');
   for (const id of ['tech', 'techTree', 'convertScore']) {
     const n = (html.match(new RegExp('id="' + id + '"', 'g')) || []).length;
     check(n === 1, `deliverable has #${id} exactly once`, `count=${n}`);

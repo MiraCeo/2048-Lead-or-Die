@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 // 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
 const ROOT = path.resolve(__dirname, '..');
+const { DELIVERABLE } = require('./_root.js');
 const vm = require('vm');
 
 let failures = 0;
@@ -43,7 +44,7 @@ global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) =>
 const ENGINE = fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8');
 vm.runInThisContext(ENGINE);
 const G = globalThis.__CF__;
-const HTML = fs.readFileSync(path.join(ROOT, '2048小游戏-教程七关.html'), 'utf8');
+const HTML = fs.readFileSync(path.join(ROOT, DELIVERABLE), 'utf8');
 
 const tile = (hp, cap, n, payload) => ({ hp, cap, n, payload, side: 'p', support: false, core: false });
 

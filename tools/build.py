@@ -4,7 +4,7 @@ Pipeline:
     src/main.script.js  --[13 patch rules]-->  tutorial script
     src/tutorial.shell.html + tutorial script  -->  tutorial document
     src/main.shell.html + main script + base64(guide) + base64(tutorial)
-        -->  2048小游戏-教程七关.html
+        -->  尔领死吧-v0.1.0.html
 
 The tutorial script is GENERATED, never hand-edited. Each patch anchor must match
 exactly once; otherwise the build aborts with a pointer to tools/derive_patches.py,

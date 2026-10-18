@@ -14,15 +14,29 @@
       - 正文首行去掉空白后，与原文件的对应行**逐字符相同**
 
 用法：
-    python tools/bundle_engine.py                 # 重建并校验，不写回
+    python tools/bundle_engine.py                 # 重建并与参照副本比对，不写回
     python tools/bundle_engine.py --write         # 校验通过后写回 main.script.js
     python tools/bundle_engine.py --diff          # 不一致时显示首个差异位置
+    python tools/bundle_engine.py --write --allow-diverge
+                                                  # 有意改动引擎时用（见下）
 
-关于「怎么证明字节不变」：两种手段，用哪个都行 ——
-    1. `git diff --stat -- src/main.script.js` 为空 —— 最直接，且不依赖额外文件；
-    2. 本脚本的参照副本 build/reference/main.script.original.js（拆分前存的快照）。
-参照副本是**可选的**：没有它脚本会跳过比对并给出警告。
-它是一次性快照，不必长期保留；`git diff` 才是日常手段。
+## 关于「字节不变」这个保证
+
+阶段 2 是**纯搬移**，所以当时要求重建结果与拆分前逐字节相同 —— 那是阶段 2 的验收标准。
+但阶段 3 起会**有意**修改引擎（改存档 KEY、品牌名），差异是预期的，不是错误。
+
+所以本脚本分两种情况：
+    默认      与参照副本 build/reference/main.script.original.js 比对；
+              不一致就拒绝写入，并提示加 --allow-diverge。
+    --allow-diverge
+              跳过参照比对（或只做提示），允许写入。
+
+**参照副本是拆分前的一次性快照，永远代表"阶段 2 那个点"。**
+日常判断"我这次改动是否符合预期"，用 git 更直接：
+
+    git diff --stat -- src/main.script.js
+
+若只想确认"没有意外改动"，比对 git 里上一个提交的版本即可，不必依赖本副本。
 """
 import hashlib
 import io
@@ -45,6 +59,7 @@ REFERENCE = ROOT / 'build' / 'reference' / 'main.script.original.js'
 
 WRITE = '--write' in sys.argv
 SHOW_DIFF = '--diff' in sys.argv
+ALLOW_DIVERGE = '--allow-diverge' in sys.argv
 
 
 def read_module(path, header_lines):
@@ -93,7 +108,7 @@ def main():
 
     built = '\n'.join(out_lines) + ('\n' if trailing_nl else '')
 
-    # ---- 与原文件比对 -------------------------------------------------------
+    # ---- 与参照副本比对 -----------------------------------------------------
     if REFERENCE.exists():
         ref = io.open(REFERENCE, encoding='utf-8', newline='').read()
         same = (built == ref)
@@ -102,7 +117,18 @@ def main():
         print('  原 sha256: %s' % hashlib.sha256(ref.encode('utf-8')).hexdigest())
         print('  新 sha256: %s' % hashlib.sha256(built.encode('utf-8')).hexdigest())
         print('  字节数   : %d  vs  %d' % (len(built.encode('utf-8')), len(ref.encode('utf-8'))))
-        print('  逐字节相同: %s' % ('✅ 是' if same else '❌ 否'))
+        if same:
+            print('  与参照相同: ✅ 是')
+        else:
+            print('  与参照相同: ❌ 否（%+d 字节）'
+                  % (len(built.encode('utf-8')) - len(ref.encode('utf-8'))))
+            if not ALLOW_DIVERGE:
+                print()
+                print('重建结果与参照副本不同。')
+                print('  · 若是**有意**改引擎（改 KEY / 品牌 / 逻辑），加 --allow-diverge 写入；')
+                print('  · 若是无意改动，用 --diff 定位首个差异。')
+                return 1
+            print('  （已给 --allow-diverge，视为有意改动）')
         if not same and SHOW_DIFF:
             a, b = ref, built
             for i in range(min(len(a), len(b))):
@@ -111,20 +137,13 @@ def main():
                     print('  首个差异在字符偏移 %d:' % i)
                     print('    原: %r' % a[max(0, i - 60):i + 60])
                     print('    新: %r' % b[max(0, i - 60):i + 60])
-                    la = a[:i].count('\n') + 1
-                    print('    （原文件第 %d 行）' % la)
+                    print('    （原文件第 %d 行）' % (a[:i].count('\n') + 1))
                     break
             else:
                 print('  仅长度不同：原 %d 字符，新 %d 字符' % (len(a), len(b)))
-        if not same:
-            print()
-            print('❌ 重建结果与原文件不一致 —— 阶段 2 不允许写入。')
-            print('   用 --diff 看首个差异位置。')
-            return 1
     else:
         print()
-        print('⚠️  找不到参照 %s' % REFERENCE)
-        print('    （只有拿到拆分前的副本才能证明字节不变；本次跳过比对）')
+        print('⚠️  找不到参照 %s（跳过比对，不影响写入）' % REFERENCE)
 
     # ---- 写回 ---------------------------------------------------------------
     if WRITE:

@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 // 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
 const ROOT = path.resolve(__dirname, '..');
+const { DELIVERABLE } = require('./_root.js');
 const vm = require('vm');
 
 let failures = 0;
@@ -43,7 +44,7 @@ global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) =>
 
 const ENGINE = fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8');
 vm.runInThisContext(ENGINE);
-const HTML = fs.readFileSync(path.join(ROOT, '2048小游戏-教程七关.html'), 'utf8');
+const HTML = fs.readFileSync(path.join(ROOT, DELIVERABLE), 'utf8');
 
 // 介绍页是 base64 嵌在交付文件里的，解出来才能验"规则真的搬过去了"
 function embeddedGuide() {
