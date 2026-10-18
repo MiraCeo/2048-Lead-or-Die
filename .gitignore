@@ -19,15 +19,14 @@ __pycache__/
 # 差异测试的临时产物。
 # **必须保留** build/difftest/base.{manifest.json,turns.jsonl} —— 它是重构前的
 # 行为基线，是 `tools/difftest.js --assert-same` 的判据，丢了就无法证明重构等价。
-# 其余（变异引擎副本、自校验与临时运行）都是一次性产物：
-#   - mutants/ 是 tools/mutate.js 生成的 210KB 引擎副本，用于反向验证工具有效性
-#   - 运行输出可随时用 --out 其它名字重跑
-/build/difftest/mutants/
-/build/difftest/selfcheck.*
-/build/difftest/det-*.json
-/build/difftest/det-*.jsonl
-/build/difftest/mut*.json
-/build/difftest/mut*.jsonl
+# 其余全是可随时用 --out 别的名字重跑的中间产物：
+#   - mutants/   tools/mutate.js 生成的 210KB 引擎副本（反向验证工具有效性用）
+#   - selfcheck  工具自校验那次运行
+#   - phase1/phase2  阶段 1、阶段 2 的验收运行（结论已记在项目文档与提交信息里）
+# 所以采用「白名单」写法：只放行 base.*，其余一律忽略。
+/build/difftest/*
+!/build/difftest/base.manifest.json
+!/build/difftest/base.turns.jsonl
 
 # 阶段 2 的一次性快照：拆分前的 main.script.js 原始副本。
 # 它只用于证明"重建逐字节相同"，而 `git diff --stat -- src/main.script.js` 为空
