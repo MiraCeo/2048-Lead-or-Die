@@ -79,6 +79,25 @@ if not chrome:
     sys.exit('找不到 Chrome / Edge')
 PROF = PATHS.BUILD / 'chromeprof'
 
+# 默认每次用**干净** profile（跑完也清掉）：
+#   ① 复用 profile 会让 localStorage 留着上一局的存档 —— 截图内容随运行历史变化，
+#      "全新开局"和"恢复存档"混在一起，不便对比；
+#   ② 一个 profile 实测能涨到 11MB（Cache/ShaderCache 等）。
+# 需要保留登录态/存档时加 --keep-profile。
+KEEP = '--keep-profile' in sys.argv
+if not KEEP and PROF.exists():
+    shutil.rmtree(PROF, ignore_errors=True)
+
+
+def cleanup():
+    if not KEEP:
+        shutil.rmtree(PROF, ignore_errors=True)
+        for p in (SRC, PATHS.BUILD / '_probe.html'):
+            try:
+                p.unlink()
+            except OSError:
+                pass
+
 if '--dom' in sys.argv:
     dom = run(chrome, URL, ['--dump-dom'], PROF)
     print('DOM 长度: %d 字符' % len(dom))
@@ -139,6 +158,7 @@ window.addEventListener('load', () => {
         capture_output=True).stdout.decode('utf-8', 'replace')
     m = re.search(r'<title>(.*?)</title>', dom, re.S)
     print(m.group(1).replace('\\n', '\n') if m else '(标题里没有 METRICS)')
+    cleanup()
 else:
     out = PATHS.BUILD / 'shot.png'
     if out.exists():
@@ -146,3 +166,4 @@ else:
     run(chrome, URL, ['--window-size=' + size_arg(),
                       '--screenshot=' + str(out)], PROF)
     print('截图: %s  (%s bytes)' % (out, out.stat().st_size if out.exists() else '失败'))
+    cleanup()
