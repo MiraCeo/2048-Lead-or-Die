@@ -44,7 +44,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #
 # ⚠️ 与存档 key 无关：`lead-or-die-v1` 里的 `v1` 是**存档结构版本**，
 #    只有存档格式变化时才递增（那会清档）。文件版本号可以随意升。
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 
 class PATHS:
