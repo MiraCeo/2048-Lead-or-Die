@@ -11,9 +11,11 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 HERE = Path(__file__).resolve().parent
-ROOT = next((p for p in [HERE, *HERE.parents] if (p / 'src').is_dir()), HERE)
+sys.path.insert(0, str(HERE))
+from _root import PATHS
 
-html = io.open(ROOT / '尔领死吧-v0.1.0.html', encoding='utf-8').read()
+html = io.open(PATHS.DELIVERABLE, encoding='utf-8').read()
+print('交付物: %s  (v%s)' % (PATHS.DELIVERABLE.name, PATHS.VERSION))
 blobs = re.findall(r"atob\('([A-Za-z0-9+/=]+)'\)", html)
 print('内嵌 blob 数: %d（应为 2：介绍页 + 教程）' % len(blobs))
 
@@ -35,11 +37,32 @@ print()
 print('教程 title    : %s' % first(r'<title>(.*?)</title>', tut))
 print('教程残留旧品牌名  : %d' % (tut.count('核心群岛') + tut.count('CORE ARCHIPELAGO')))
 
+# ---- 版本号一致性 ---------------------------------------------------------
+# 版本号的唯一来源是 tools/_root.py 的 VERSION，由 build.py 注入三处：
+# 主外壳页脚、教程外壳页脚、介绍页眉标。
+# 这个工具本来就要**解码**内嵌文档，所以顺便校验注入是否处处生效 ——
+# 否则漏注入会表现为"页脚还写着旧版本"，而那种错误在无头测试里看不出来。
+print()
+print('=== 版本号注入校验（期望 v%s） ===' % PATHS.VERSION)
+ver = PATHS.VERSION
+checks = [
+    ('主外壳页脚', 'v%s · 自动保存' % ver in html),
+    ('教程页脚', 'v%s · 自动保存' % ver in tut),
+    ('介绍页眉标', 'V%s' % ver in guide),
+]
+for label, ok in checks:
+    print('  %-12s %s' % (label, '✅' if ok else '❌ 未注入 v%s' % ver))
+# 占位符绝不能漏到产物里
+leftover = html.count('__VERSION__') + tut.count('__VERSION__') + guide.count('__VERSION__')
+print('  %-12s %s' % ('占位符残留', '✅ 0 处' if not leftover else '❌ %d 处' % leftover))
+
 print()
 bad = 0
 if guide.count('CORE ARCHIPELAGO') or guide.count('核心群岛'):
     bad += 1
 if tut.count('CORE ARCHIPELAGO') or tut.count('核心群岛'):
     bad += 1
-print('结论: %s' % ('✅ 两份内嵌文档品牌名均已更新' if not bad else '❌ 仍有残留'))
+if not all(ok for _, ok in checks) or leftover:
+    bad += 1
+print('结论: %s' % ('✅ 品牌名与版本号均正确' if not bad else '❌ 有问题，见上'))
 sys.exit(1 if bad else 0)
