@@ -1604,16 +1604,18 @@
     $('modeLabel').textContent = mode === 'main' ? '主体移动 · 键盘操作' : '单块调整 · Esc 返回主体';
     const cam = camera(s);
     $('targetCount').textContent = `视野 行 ${cam.r + 1}–${cam.r + V} / 列 ${cam.c + 1}–${cam.c + V}`;
-    // 舰队列表：只有一支时不必摆按钮，收成一行；多支才列出可切换的核心。
-    // （不同的核心才需要切换，一支时把 44px 高的按钮换成一行摘要。）
+    // 舰队列表：只有一支时**整块面板隐藏**（不是只把按钮收起来）。
+    // 摘要行「仅一支…」本身就没什么信息量 —— 玩家从"主体/其他己方"已经能看出只有一支，
+    // 而隐藏整块面板能省下约 85px，v0.1.5 正是靠它把左栏塞进视口的。
+    // 多支时才显示面板与切换按钮，功能一处不少。
     const cores0 = cores(s, 'p');
     const activeCore = cores0.find((t) => t.id === s.active);
     const roleOf = (t) => (t.id === s.primary && !s.primaryLost ? '主' : '分');
+    const fleetPanel = $('fleetPanel');
+    if (fleetPanel) fleetPanel.style.display = cores0.length <= 1 ? 'none' : '';
     $('fleetSummary').textContent =
-      cores0.length <= 1
-        ? cores0.length === 1
-          ? `仅一支：${roleOf(cores0[0])}核心 ${fmt(cores0[0].n)} · 无需切换`
-          : '没有己方核心'
+      cores0.length === 0
+        ? '没有己方核心'
         : `${cores0.length} 支舰队 · 当前 ${activeCore ? roleOf(activeCore) + '核心 ' + fmt(activeCore.n) : '—'} · 点击切换`;
     $('fleets').replaceChildren(
       ...(cores0.length <= 1

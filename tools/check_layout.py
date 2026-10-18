@@ -130,12 +130,25 @@ for sz in SIZES:
     check(pa > 0 and bd > 0 and (pa - bd) <= 60,
           '%-10s 中间列 %3dpx 贴合棋盘框 %3dpx（差值 %d，应 ≤60）'
           % (sz, pa, bd, pa - bd))
-    # 顶栏是**全局工具条**，应横跨整页；挤在窄中列里会压住模式文字与按钮。
-    tb = grab(r'\.topbar:\s*x=\d+\s*y=\d+\s*w=(\d+)')
+    # 顶栏已取消（v0.1.5），状态改放页脚 —— 页脚状态区应横跨大部分宽度
+    ss = grab(r'\.status-slot:\s*x=\d+\s*y=\d+\s*w=(\d+)')
     sh = grab(r'\.shell:\s*x=\d+\s*y=\d+\s*w=(\d+)')
-    check(tb > 0 and sh > 0 and tb >= sh * 0.85,
-          '%-10s 顶栏 %4dpx 横跨整页（外壳 %4dpx 的 %.0f%%）'
-          % (sz, tb, sh, 100.0 * tb / sh if sh else 0))
+    check(ss > 0 and sh > 0 and ss >= sh * 0.6,
+          '%-10s 页脚状态区 %4dpx 横跨（外壳 %4dpx 的 %.0f%%）'
+          % (sz, ss, sh, 100.0 * ss / sh if sh else 0))
+    # ★ 两栏**不得内部溢出**。v0.1.5 之前左栏溢出 91px、右栏 166px，
+    #   "全部同屏"是假的（内容藏在栏内滚动条后面）。
+    #   但两栏内容高度是固定的，视口矮到一定程度必然溢出 ——
+    #   所以只对"视口高 ≥ 700"的尺寸严格断言，更矮的只报告（见项目文档 §21.5）。
+    lv = grab(r'\.layout\s*(?:&gt;|>)\s*aside:ov=(-?\d+)')
+    rv = grab(r'\.layout\s*(?:&gt;|>)\s*\.right:ov=(-?\d+)')
+    if vh >= 700:
+        check(lv <= 0 and rv <= 0,
+              '%-10s 侧栏无内部溢出（左 %+d / 右 %+d，应为 ≤0）' % (sz, lv, rv))
+    else:
+        print('  报告  %-10s 视口仅 %dpx：侧栏溢出 左 %+d / 右 %+d'
+              '（内容高度固定，矮屏必然栏内滚动；页面本身仍不滚动）'
+              % (sz, vh, lv, rv))
 
 print()
 print('%d 项失败' % len(fails))

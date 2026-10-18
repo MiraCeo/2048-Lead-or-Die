@@ -115,6 +115,15 @@ window.addEventListener('load', () => {
   push('aside.left', document.querySelector('.layout > aside'));
   push('aside.right', document.querySelector('.right'));
   push('footer', document.querySelector('footer'));
+  // 侧栏是否内部溢出（scrollHeight > clientHeight）—— v0.1.5 之前两栏都溢出，
+  // "全部同屏"其实是假的。这条必须能机器验。
+  const ov = (sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return sel + ':ov=-1';
+    return sel + ':ov=' + (el.scrollHeight - el.clientHeight);
+  };
+  out.push(ov('.layout > aside'));
+  out.push(ov('.layout > .right'));
   document.title = 'METRICS\\n' + out.join('\\n');
 });
 </script>

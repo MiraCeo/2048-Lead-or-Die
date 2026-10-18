@@ -90,15 +90,22 @@ console.log('\n=== 关键 id 必须唯一 ===');
   }
 }
 
-console.log('\n=== 状态条改为不占位的临时浮层 ===');
+console.log('\n=== 状态条：不占位的浮层，且随 v0.1.5 移入页脚状态栏 ===');
 {
   check(notHas(HTML, 'id="status"'), '常驻状态条已删除');
-  check(has(HTML, 'class="feedback"'), '临时浮层在场');
+  check(has(HTML, 'class="status-overlay feedback"'), '临时浮层在场');
   check(has(HTML, '.feedback{position:absolute'), '浮层是绝对定位（不占布局空间）');
   check(has(ENGINE, "$('feedback')"), 'say() 已改到浮层');
   check(notHas(ENGINE, "$('status')"), '旧的状态条引用已清除');
+  // v0.1.5：header 与 topbar 取消，悬停/预览/反馈统一进**页脚状态栏**
+  // （页脚横跨整页且只有 24px，等于零额外高度；居中后正好在棋盘下方）。
+  check(notHas(HTML, '<header'), '顶部品牌横幅已取消（品牌并入左栏）');
+  check(notHas(HTML, 'class="topbar"'), '顶部工具条已取消');
   const iHint = HTML.indexOf('id="previewHint"'), iCanvas = HTML.indexOf('id="canvas"');
-  check(iHint > 0 && iCanvas > 0 && iHint < iCanvas, '预览结果位仍在棋盘之前');
+  check(iHint > 0 && iCanvas > 0 && iHint > iCanvas,
+        '预览结果位移到棋盘之后的页脚状态栏（仍在同一屏内）');
+  const iFooter = HTML.indexOf('<footer'), iSlot = HTML.indexOf('class="status-slot"');
+  check(iSlot > iFooter, '状态槽在页脚内');
 }
 
 console.log('\n=== 规则搬进游戏介绍 ===');
@@ -110,8 +117,8 @@ console.log('\n=== 规则搬进游戏介绍 ===');
   check(notHas(ENGINE, '实心底色区分阵营'), '画布底部规则文字已从引擎移除');
   check(notHas(ENGINE, '碉堡每回合射击'), '画布底部的射程/补给说明已移除');
   check(notHas(HTML, '点击绿色核心标记切换视野'), '小地图提示不再常驻');
-  check(has(HTML, '<div id="previewHint" class="mini-detail map-keyhint"></div>'),
-        '棋盘上方的预览位默认是空的');
+  check(has(HTML, '<span id="previewHint" class="status-overlay"></span>'),
+        '预览位默认是空元素（页脚状态栏里的空 span，不占高度）');
   check(has(ENGINE, "$('previewHint').textContent=''"),
         'clearPreview() 清空预览位，而不是把操作说明写回去');
 }
