@@ -28,3 +28,8 @@ __pycache__/
 /build/difftest/det-*.jsonl
 /build/difftest/mut*.json
 /build/difftest/mut*.jsonl
+
+# 阶段 2 的一次性快照：拆分前的 main.script.js 原始副本。
+# 它只用于证明"重建逐字节相同"，而 `git diff --stat -- src/main.script.js` 为空
+# 是更直接的同等证据，所以不必长期保留。
+/build/reference/main.script.original.js

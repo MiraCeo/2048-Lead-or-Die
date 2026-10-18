@@ -1,0 +1,74 @@
+{
+  "source": "src/main.script.js",
+  "sourceLines": 161,
+  "trailingNewline": true,
+  "headerLines": 3,
+  "modules": [
+    {
+      "name": "10-prelude",
+      "start": 1,
+      "end": 13,
+      "lines": 13
+    },
+    {
+      "name": "20-board",
+      "start": 14,
+      "end": 25,
+      "lines": 12
+    },
+    {
+      "name": "30-units",
+      "start": 26,
+      "end": 48,
+      "lines": 23
+    },
+    {
+      "name": "40-combat",
+      "start": 49,
+      "end": 57,
+      "lines": 9
+    },
+    {
+      "name": "50-absorb",
+      "start": 58,
+      "end": 74,
+      "lines": 17
+    },
+    {
+      "name": "60-tech",
+      "start": 75,
+      "end": 93,
+      "lines": 19
+    },
+    {
+      "name": "70-turn",
+      "start": 94,
+      "end": 105,
+      "lines": 12
+    },
+    {
+      "name": "80-ui",
+      "start": 106,
+      "end": 129,
+      "lines": 24
+    },
+    {
+      "name": "90-draw",
+      "start": 130,
+      "end": 148,
+      "lines": 19
+    },
+    {
+      "name": "95-input",
+      "start": 149,
+      "end": 160,
+      "lines": 12
+    },
+    {
+      "name": "99-boot",
+      "start": 161,
+      "end": 161,
+      "lines": 1
+    }
+  ]
+}
