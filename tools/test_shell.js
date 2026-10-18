@@ -185,14 +185,18 @@ console.log('\n=== 核心从血量配色中排除 ===');
   check(has(ENGINE, "if(t.side==='p'&&!t.core&&t.hp<t.cap)"), '核心不再参与血量配色');
 }
 
-console.log('\n=== 舰队列表：只有一支时收缩成一行 ===');
+console.log('\n=== 舰队列表：只有一支时整块面板隐藏 ===');
 {
   check(has(HTML, 'id="fleetSummary"'), '舰队摘要元素在场');
+  check(has(HTML, 'id="fleetPanel"'), '舰队面板有 id（供按数量隐藏）');
   // 只有一支时不应渲染切换按钮（返回空数组）
   check(has(ENGINE, 'cores0.length <= 1 ? [] : cores0.map'),
         '只有一支时不渲染切换按钮');
-  // 一支时给出"无需切换"的明确文案，而不是留空
-  check(has(ENGINE, '无需切换'), '一支时显示「无需切换」');
+  // v0.1.5 起：一支时**整块面板隐藏**（不是只换文案）—— 省 85px，是左栏能装下的关键。
+  // 旧断言查的是"无需切换"文案，那条随此改动删除；这里改为断言隐藏逻辑本身。
+  check(has(ENGINE, "fleetPanel.style.display = cores0.length <= 1 ? 'none' : ''"),
+        '一支时隐藏整块面板');
+  check(has(ENGINE, '支舰队 · 当前'), '多支时摘要给出数量与当前核心');
   // 多支时仍保留切换入口（不因收缩而丢功能）
   check(has(ENGINE, "b.onclick = () => {") && has(ENGINE, 'switchCore(t.id)'),
         '多支时仍可切换核心（功能未丢）');

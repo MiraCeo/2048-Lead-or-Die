@@ -43,3 +43,10 @@ __pycache__/
 /build/_shot_src.html
 /build/_probe.html
 /build/chromeprof/
+
+# 平衡基准（tools/balance.js）的产物。
+# **必须保留** build/balance/base.json —— 它是难度调整前的对照基线，
+# 丢了就无法证明"这项改动把难度推向了哪个方向"。
+# 其余（_smoke、after 等中间运行）都是一次性的。
+/build/balance/*
+!/build/balance/base.json

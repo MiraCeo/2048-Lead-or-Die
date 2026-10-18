@@ -1,0 +1,362 @@
+{
+  "engine": "build/engine.js",
+  "engineSha256": "cff849d7b60538f6479088add833f0c4d6993ac32a170e97170c8c67d9fe2971",
+  "seeds": 10,
+  "turns": 400,
+  "apBudget": 12,
+  "seedBase": 20261017,
+  "runs": [
+    {
+      "seed": 20261017,
+      "turns": 372,
+      "dead": true,
+      "settled": false,
+      "peak": 128,
+      "peakTurn": 199,
+      "first2048": null,
+      "kills": 127,
+      "tech": 38,
+      "maxMembers": 64,
+      "score": 2636,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 200,
+          "core": 128,
+          "best": 128
+        },
+        {
+          "turn": 300,
+          "core": 128,
+          "best": 128
+        }
+      ]
+    },
+    {
+      "seed": 20268936,
+      "turns": 282,
+      "dead": true,
+      "settled": false,
+      "peak": 128,
+      "peakTurn": 139,
+      "first2048": null,
+      "kills": 154,
+      "tech": 31,
+      "maxMembers": 43,
+      "score": 1892,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 200,
+          "core": 128,
+          "best": 128
+        }
+      ]
+    },
+    {
+      "seed": 20276855,
+      "turns": 400,
+      "dead": false,
+      "settled": false,
+      "peak": 256,
+      "peakTurn": 386,
+      "first2048": null,
+      "kills": 116,
+      "tech": 33,
+      "maxMembers": 82,
+      "score": 4132,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 32,
+          "best": 32
+        },
+        {
+          "turn": 200,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 300,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 400,
+          "core": 128,
+          "best": 256
+        }
+      ]
+    },
+    {
+      "seed": 20284774,
+      "turns": 240,
+      "dead": true,
+      "settled": false,
+      "peak": 128,
+      "peakTurn": 191,
+      "first2048": null,
+      "kills": 128,
+      "tech": 19,
+      "maxMembers": 25,
+      "score": 1292,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 200,
+          "core": 64,
+          "best": 128
+        }
+      ]
+    },
+    {
+      "seed": 20292693,
+      "turns": 362,
+      "dead": true,
+      "settled": false,
+      "peak": 128,
+      "peakTurn": 209,
+      "first2048": null,
+      "kills": 215,
+      "tech": 51,
+      "maxMembers": 50,
+      "score": 2872,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 32,
+          "best": 32
+        },
+        {
+          "turn": 200,
+          "core": 32,
+          "best": 64
+        },
+        {
+          "turn": 300,
+          "core": 64,
+          "best": 128
+        }
+      ]
+    },
+    {
+      "seed": 20300612,
+      "turns": 400,
+      "dead": false,
+      "settled": false,
+      "peak": 512,
+      "peakTurn": 271,
+      "first2048": null,
+      "kills": 89,
+      "tech": 33,
+      "maxMembers": 86,
+      "score": 5512,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 200,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 300,
+          "core": 512,
+          "best": 512
+        },
+        {
+          "turn": 400,
+          "core": 512,
+          "best": 512
+        }
+      ]
+    },
+    {
+      "seed": 20308531,
+      "turns": 400,
+      "dead": false,
+      "settled": false,
+      "peak": 128,
+      "peakTurn": 126,
+      "first2048": null,
+      "kills": 193,
+      "tech": 37,
+      "maxMembers": 97,
+      "score": 4000,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 200,
+          "core": 128,
+          "best": 128
+        },
+        {
+          "turn": 300,
+          "core": 128,
+          "best": 128
+        },
+        {
+          "turn": 400,
+          "core": 128,
+          "best": 128
+        }
+      ]
+    },
+    {
+      "seed": 20316450,
+      "turns": 400,
+      "dead": false,
+      "settled": false,
+      "peak": 512,
+      "peakTurn": 255,
+      "first2048": null,
+      "kills": 203,
+      "tech": 44,
+      "maxMembers": 118,
+      "score": 5964,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 200,
+          "core": 128,
+          "best": 128
+        },
+        {
+          "turn": 300,
+          "core": 512,
+          "best": 512
+        },
+        {
+          "turn": 400,
+          "core": 512,
+          "best": 512
+        }
+      ]
+    },
+    {
+      "seed": 20324369,
+      "turns": 394,
+      "dead": true,
+      "settled": false,
+      "peak": 256,
+      "peakTurn": 274,
+      "first2048": null,
+      "kills": 186,
+      "tech": 39,
+      "maxMembers": 39,
+      "score": 4836,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 200,
+          "core": 128,
+          "best": 128
+        },
+        {
+          "turn": 300,
+          "core": 128,
+          "best": 256
+        }
+      ]
+    },
+    {
+      "seed": 20332288,
+      "turns": 400,
+      "dead": false,
+      "settled": false,
+      "peak": 512,
+      "peakTurn": 292,
+      "first2048": null,
+      "kills": 200,
+      "tech": 38,
+      "maxMembers": 117,
+      "score": 8752,
+      "trail": [
+        {
+          "turn": 100,
+          "core": 64,
+          "best": 64
+        },
+        {
+          "turn": 200,
+          "core": 128,
+          "best": 128
+        },
+        {
+          "turn": 300,
+          "core": 128,
+          "best": 512
+        },
+        {
+          "turn": 400,
+          "core": 128,
+          "best": 512
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "games": 10,
+    "survivalRate": 0.5,
+    "turnsMean": 365,
+    "turnsMedian": 397,
+    "turnsMin": 240,
+    "turnsMax": 400,
+    "achieve2048Rate": 0,
+    "peakBuckets": {
+      "<64": 0,
+      "64–256": 7,
+      "512–1K": 3,
+      "2048+": 0
+    },
+    "killsMean": 161,
+    "techMean": 36,
+    "scoreMean": 4189,
+    "maxMembersMean": 72,
+    "coreTrail": [
+      {
+        "turn": 100,
+        "core": 58
+      },
+      {
+        "turn": 200,
+        "core": 99
+      },
+      {
+        "turn": 300,
+        "core": 208
+      },
+      {
+        "turn": 400,
+        "core": 282
+      }
+    ]
+  }
+}

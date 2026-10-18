@@ -20,7 +20,10 @@
 // （项目文档 §14.7 记录的坑）。所以比较基线走 --assert-same 读取文件，不双载。
 const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
+
+// 智能体与引擎加载从共享模块取 —— 不再各写一份。
+// 平衡基准 tools/balance.js 用的是同一份实现，所以两个工具测的是"同一个玩家"。
+const { loadEngine, clearStorage, spendAP, chooseDir, DIRS: HARNESS_DIRS } = require('./_harness.js');
 
 // ---- 参数 -----------------------------------------------------------------
 function argOf(name, dflt) {
@@ -40,82 +43,8 @@ if (!fs.existsSync(ENGINE)) {
   process.exit(2);
 }
 
-// ---- DOM 桩（与 harness.js / trace.js 保持一致） ----------------------------
-function makeStub() {
-  const f = function () {};
-  return new Proxy(f, {
-    get(t, k) {
-      if (k === 'then') return undefined;
-      if (k === Symbol.toPrimitive) return () => '';
-      if (k === Symbol.iterator) return function* () {};
-      if (k === 'toString' || k === 'valueOf') return () => '';
-      if (k === 'length') return 0;
-      if (!(k in t)) t[k] = makeStub();
-      return t[k];
-    },
-    set() { return true; },
-    apply() { return makeStub(); },
-    construct() { return makeStub(); },
-  });
-}
-global.document = makeStub();
-global.window = makeStub();
-global.requestAnimationFrame = () => 0;
-const store = new Map();
-global.localStorage = {
-  getItem: (k) => (store.has(k) ? store.get(k) : null),
-  setItem: (k, v) => store.set(k, String(v)),
-  removeItem: (k) => store.delete(k),
-};
-
-vm.runInThisContext(fs.readFileSync(ENGINE, 'utf8'));
-const G = globalThis.__CF__;
-if (!G || typeof G.initial !== 'function' || typeof G.worldStep !== 'function') {
-  console.error('引擎没有导出 initial/worldStep —— __CF__ 不完整');
-  process.exit(2);
-}
-const DIRS = ['up', 'down', 'left', 'right'];
-
-// ---- 确定性智能体（照搬 harness.js，保证与既有实验口径一致） ----------------
-function spendAP(q, budget) {
-  let used = 0;
-  for (let k = 0; k < budget; k++) {
-    if (q.ap < 1) break;
-    const ids = q.g.filter((t) => t && t.side === 'p' && !t.core && !t.support).map((t) => t.id);
-    let found = null;
-    for (const id of ids) {
-      for (const d of DIRS) {
-        const draft = G.copy(q);
-        const r = G.extraStep(draft, id, d);
-        if (r.error) continue;
-        if (draft.g.filter(Boolean).length < q.g.filter(Boolean).length) { found = draft; break; }
-      }
-      if (found) break;
-    }
-    if (!found) break;
-    Object.assign(q, found);
-    used++;
-  }
-  return used;
-}
-
-function chooseDir(q) {
-  const targets = [];
-  q.g.forEach((t, i) => { if (t && t.side === 'n') targets.push(i); });
-  q.g.forEach((t, i) => { if (t && t.side === 'e') targets.push(i); });
-  if (!targets.length) return null;
-  let pick = null;
-  for (const d of DIRS) {
-    const draft = G.copy(q);
-    const r = G.moveMain(draft, d);
-    if (!r) continue;
-    const di = draft.g.findIndex((t) => t && t.core && t.id === draft.active);
-    const dist = di >= 0 ? Math.min(...targets.map((t) => Math.sqrt(G.dist2(di, t)))) : 99;
-    const score = r.merges * 10 + r.recruited * 4 - dist * 0.6 + (r.contacts || 0);
-    if (!pick || score > pick.score) pick = { d, score };
-  }
-  return pick;
-}
+const G = loadEngine(ENGINE);
+const DIRS = HARNESS_DIRS;
 
 // ---- 规范化 ----------------------------------------------------------------
 // 方块对象按**键名排序**后逐键输出：既能捕获「字段增删」，又不受键的插入顺序影响。
@@ -208,7 +137,7 @@ const SEED_BASE = 20261017;
 function seedFor(i) { return (SEED_BASE + i * 7919) >>> 0; }
 
 function playOne(seed) {
-  store.clear();
+  clearStorage();
   const q = G.initial(seed);
   const turns = [];
   let snap0 = JSON.stringify(snapshot(q));
@@ -216,8 +145,8 @@ function playOne(seed) {
 
   for (let step = 0; step < TURNS; step++) {
     if (q.dead || q.settled) break;
-    spendAP(q, AP_BUDGET);
-    const pick = chooseDir(q);
+    spendAP(G, q, AP_BUDGET);
+    const pick = chooseDir(G, q);
     let r = null, dir = null;
     if (pick) { dir = pick.d; r = G.worldStep(q, dir); }
     if (!r) {

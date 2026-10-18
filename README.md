@@ -138,6 +138,23 @@ node tools/difftest.js --engine build/engine.js --seeds 6 --turns 400 `
 `difftest` 用固定种子跑完整对局并逐回合比对**全部方块字段与计数器**，
 用来证明「重构没有改变行为」。它自己也做过反向验证：注入已知变异能被检出。
 
+### 平衡测量（难度调整用）
+
+```powershell
+# 记录基线（一次，约 7 分钟）
+node tools/balance.js --engine build/engine.js --seeds 10 --turns 400 --out build/balance/base
+
+# 改完数值后复测并对比
+node tools/balance.js --engine build/engine.js --seeds 10 --turns 400 `
+     --out build/balance/after --compare build/balance/base
+```
+
+输出逐局明细与汇总（存活率、存活回合均值/中位、峰值分布、达成 2048 比例、共享 core 轨迹），
+对比模式还会给出每个指标的**前后差值**。
+
+> 两个工具共用 `tools/_harness.js` 里的同一份确定性智能体，所以测的是「同一个玩家」：
+> `difftest` 断言行为**不变**，`balance` 报告行为**怎么变**。
+
 ### 诊断与复核（无断言，只输出数字）
 
 ```powershell
