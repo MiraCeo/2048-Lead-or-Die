@@ -129,7 +129,11 @@ node tools/report_tech_cost.js          # 科技树各级成本与效果
 node tools/report_regen_math.js         # 回血与伤害参考数值
 node tools/report_radius_throughput.js  # 半径与站点吞吐是否互相打架
 python tools/engine_structure.py        # 打印引擎的顶层结构
+python tools/check_branding.py          # 解码内嵌的介绍页/教程，检查品牌名一致
 ```
+
+> 这两份内嵌文档是 **base64** 存的，在交付物 HTML 里明文搜不到 ——
+> 要检查它们的内容必须**解码后**再检索。
 
 ---
 
