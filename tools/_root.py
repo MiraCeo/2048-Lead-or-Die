@@ -44,7 +44,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #
 # ⚠️ 与存档 key 无关：`lead-or-die-v1` 里的 `v1` 是**存档结构版本**，
 #    只有存档格式变化时才递增（那会清档）。文件版本号可以随意升。
-VERSION = '0.1.6'
+VERSION = '0.2.0'
 
 
 class PATHS:
@@ -68,13 +68,25 @@ class PATHS:
     # 网页端只需刷新这个文件就能看到最新版本，不必去猜哪个带版本号。
     DELIVERABLE = ROOT / '尔领死吧.html'
 
-    # 按版本号留档的副本目录（发版时由 build.py --release 写入）
+    # 按版本号留档的副本目录（发版时由 build.py --release 写入）。
+    # 用户要求按**大版本**分目录：releases/0.1/ · releases/0.2/ ……
+    # 对应"大版本定方向、小版本推进"的语义：一个目录就是一条工作线。
     RELEASES = ROOT / 'releases'
 
     @staticmethod
+    def release_dir(version=None):
+        """`releases/0.1`：取版本号前两段（大版本）作目录。
+
+        与"大版本 = 方向"的语义一致：0.1=整理残留、0.2=新增与调整内容。
+        """
+        v = version or PATHS.VERSION
+        return PATHS.RELEASES / '.'.join(v.split('.')[:2])
+
+    @staticmethod
     def release_file(version=None):
-        """`releases/尔领死吧-vX.Y.Z.html`。"""
-        return PATHS.RELEASES / ('尔领死吧-v%s.html' % (version or PATHS.VERSION))
+        """`releases/<大版本>/尔领死吧-vX.Y.Z.html`。"""
+        v = version or PATHS.VERSION
+        return PATHS.release_dir(v) / ('尔领死吧-v%s.html' % v)
 
     # 步骤 0 的逐字节原始参照（历史快照，不要覆盖）
     ORIGINAL = REFERENCE / '2048.original.html'
