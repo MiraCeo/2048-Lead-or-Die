@@ -5,6 +5,9 @@
 // canvas 画出来的东西无头环境看不到，所以这里验的是**事件**：
 // 谁在什么条件下产生哪个特效、坐标是否合法、模拟调用会不会冒出幽灵特效。
 const fs = require('fs');
+const path = require('path');
+// 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
+const ROOT = path.resolve(__dirname, '..');
 const vm = require('vm');
 
 let failures = 0;
@@ -31,7 +34,7 @@ global.requestAnimationFrame = () => 0;
 const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const ENGINE = fs.readFileSync('D:\\2048\\build\\engine.js', 'utf8');
+const ENGINE = fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8');
 vm.runInThisContext(ENGINE);
 const G = globalThis.__CF__;
 const P = (r, c) => r * 100 + c;

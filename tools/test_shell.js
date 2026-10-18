@@ -7,6 +7,9 @@
 // 所以 id 掉了、测试也不会报错，只有真人打开浏览器才会发现界面空了。
 // 这里直接把「引擎引用的 id」与「交付文件里真实存在的 id」对起来。
 const fs = require('fs');
+const path = require('path');
+// 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
+const ROOT = path.resolve(__dirname, '..');
 const vm = require('vm');
 
 let failures = 0;
@@ -38,9 +41,9 @@ global.requestAnimationFrame = () => 0;
 const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const ENGINE = fs.readFileSync('D:\\2048\\build\\engine.js', 'utf8');
+const ENGINE = fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8');
 vm.runInThisContext(ENGINE);
-const HTML = fs.readFileSync('D:\\2048\\2048小游戏-教程七关.html', 'utf8');
+const HTML = fs.readFileSync(path.join(ROOT, '2048小游戏-教程七关.html'), 'utf8');
 
 // 介绍页是 base64 嵌在交付文件里的，解出来才能验"规则真的搬过去了"
 function embeddedGuide() {

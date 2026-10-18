@@ -6,6 +6,9 @@
 //   1. 运行层：新绘制路径不抛错；战报行为（跑若干回合后是否还有例行行）
 //   2. 源码层：关键公式在场、旧实现已消失（防止被悄悄改回去）
 const fs = require('fs');
+const path = require('path');
+// 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
+const ROOT = path.resolve(__dirname, '..');
 const vm = require('vm');
 
 let failures = 0;
@@ -37,10 +40,10 @@ global.requestAnimationFrame = () => 0;
 const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const ENGINE = fs.readFileSync('D:\\2048\\build\\engine.js', 'utf8');
+const ENGINE = fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8');
 vm.runInThisContext(ENGINE);
 const G = globalThis.__CF__;
-const HTML = fs.readFileSync('D:\\2048\\2048小游戏-教程七关.html', 'utf8');
+const HTML = fs.readFileSync(path.join(ROOT, '2048小游戏-教程七关.html'), 'utf8');
 
 const tile = (hp, cap, n, payload) => ({ hp, cap, n, payload, side: 'p', support: false, core: false });
 

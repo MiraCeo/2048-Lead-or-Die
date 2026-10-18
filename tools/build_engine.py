@@ -25,7 +25,10 @@ import re
 import sys
 from pathlib import Path
 
-DEFAULT_HTML = r'D:\2048\2048小游戏-教程七关.html'
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import PATHS
+
+DEFAULT_HTML = str(PATHS.DELIVERABLE)
 CLOSER = '})();'
 
 # Functions the headless harnesses reach through globalThis.__CF__.

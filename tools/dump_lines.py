@@ -12,7 +12,10 @@ try:
 except Exception:
     pass
 
-ROOT = Path(r'D:\2048')
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import PATHS
+
+ROOT = PATHS.ROOT
 SRC = ROOT / 'src' / 'main.script.js'
 OUT = ROOT / 'build' / 'reports' / 'step1_lines.txt'
 

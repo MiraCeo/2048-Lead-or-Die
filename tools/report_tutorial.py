@@ -14,8 +14,11 @@ try:
 except Exception:
     pass
 
-HTML = Path(r'D:\2048\2048小游戏-教程七关.html')
-OUT = Path(r'D:\2048\build\reports\tutorial_hooks.txt')
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import PATHS
+
+HTML = PATHS.DELIVERABLE
+OUT = PATHS.REPORTS / 'tutorial_hooks.txt'
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
 html = HTML.read_text(encoding='utf-8')

@@ -12,8 +12,11 @@ try:
 except Exception:
     pass
 
-ROOT = Path(r'D:\2048')
-SRC = ROOT / 'src'
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import PATHS
+
+ROOT = PATHS.ROOT
+SRC = PATHS.SRC
 
 spec = importlib.util.spec_from_file_location('topic', SRC / 'tutorial.patches.py')
 mod = importlib.util.module_from_spec(spec)

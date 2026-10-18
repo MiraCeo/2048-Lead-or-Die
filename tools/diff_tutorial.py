@@ -23,7 +23,10 @@ try:
 except Exception:
     pass
 
-HTML = Path(r'D:\2048\2048小游戏-教程七关.html')
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import PATHS
+
+HTML = PATHS.DELIVERABLE
 BLOB_RE = re.compile(r"atob\('([A-Za-z0-9+/=]+)'\)")
 
 html = HTML.read_text(encoding='utf-8')

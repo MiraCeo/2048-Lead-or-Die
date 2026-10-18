@@ -2,6 +2,9 @@
 //
 //   node tools/test_step4.js
 const fs = require('fs');
+const path = require('path');
+// 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
+const ROOT = path.resolve(__dirname, '..');
 const vm = require('vm');
 
 let failures = 0;
@@ -33,7 +36,7 @@ global.requestAnimationFrame = () => 0;
 const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-vm.runInThisContext(fs.readFileSync('D:\\2048\\build\\engine.js', 'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8'));
 const G = globalThis.__CF__;
 for (const fn of ['survey', 'convertScore', 'buyTech', 'absorbTp', 'siteRadius', 'techCost']) {
   check(typeof G[fn] === 'function', `${fn} exported`);
@@ -214,7 +217,7 @@ console.log('\n=== H. invariants over a full game ===');
 // ---------------------------------------------------------------------------
 console.log('\n=== I. the tech panel is wired into the deliverable and is safe ===');
 {
-  const html = fs.readFileSync('D:\\2048\\2048小游戏-教程七关.html', 'utf8');
+  const html = fs.readFileSync(path.join(ROOT, '2048小游戏-教程七关.html'), 'utf8');
   for (const id of ['tech', 'techTree', 'convertScore']) {
     const n = (html.match(new RegExp('id="' + id + '"', 'g')) || []).length;
     check(n === 1, `deliverable has #${id} exactly once`, `count=${n}`);

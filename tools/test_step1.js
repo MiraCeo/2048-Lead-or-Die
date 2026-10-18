@@ -8,8 +8,9 @@
 const fs = require('fs');
 const vm = require('vm');
 const path = require('path');
+// 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
+const ROOT = path.resolve(__dirname, '..');
 
-const ROOT = 'D:\\2048';
 const MODE = process.argv[2] || 'engine';
 
 let failures = 0;

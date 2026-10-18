@@ -2,6 +2,9 @@
 //
 //   node tools/report_tech_cost.js
 const fs = require('fs');
+const path = require('path');
+// 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
+const ROOT = path.resolve(__dirname, '..');
 const vm = require('vm');
 
 function makeStub() {
@@ -21,7 +24,7 @@ global.window = makeStub();
 global.requestAnimationFrame = () => 0;
 const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
-vm.runInThisContext(fs.readFileSync('D:\\2048\\build\\engine.js', 'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8'));
 const G = globalThis.__CF__;
 
 const LINES = [['threshold', '自动合成阈值'], ['tp', '吸收吞吐'], ['radius', '收集半径']];
@@ -41,7 +44,7 @@ for (const [line, name] of LINES) {
 console.log('\n全线合计：' + total + ' 点');
 
 // 顺带把当前的关键常量打出来，供文档速查表对齐
-const src = fs.readFileSync('D:\\2048\\src\\main.script.js', 'utf8');
+const src = fs.readFileSync(path.join(ROOT, 'src', 'main.script.js'), 'utf8');
 const m = src.match(/const ABSORB_CAP=[^\n]*;/);
 console.log('\n常量行：\n  ' + (m ? m[0] : '?'));
 const m2 = src.match(/const SCORE_PER_TECH=[^\n]*;/);

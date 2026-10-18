@@ -6,9 +6,14 @@ from the HTML after every edit instead of hand-syncing two copies.
 """
 import re
 import difflib
+import sys
+from pathlib import Path
 
-HTML = r'D:\2048\2048小游戏-教程七关.html'
-ENG = r'D:\2048\.analyze\core-fleet.engine.js'
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import PATHS
+
+HTML = str(PATHS.DELIVERABLE)
+ENG = str(PATHS.ANALYZE_ENGINE)
 
 
 def load(p):

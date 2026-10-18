@@ -3,6 +3,9 @@
 //
 //   node tools/test_step2_tutorial.js
 const fs = require('fs');
+const path = require('path');
+// 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
+const ROOT = path.resolve(__dirname, '..');
 const vm = require('vm');
 
 let failures = 0;
@@ -34,7 +37,7 @@ global.requestAnimationFrame = () => 0;
 const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const html = fs.readFileSync('D:\\2048\\2048小游戏-教程七关.html', 'utf8');
+const html = fs.readFileSync(path.join(ROOT, '2048小游戏-教程七关.html'), 'utf8');
 const blobs = [...html.matchAll(/atob\('([A-Za-z0-9+/=]+)'\)/g)].map((m) => m[1]);
 const tutorialHtml = Buffer.from(blobs[1], 'base64').toString('utf8');
 let ts = tutorialHtml.match(/<script[^>]*>([\s\S]*?)<\/script>/)[1];

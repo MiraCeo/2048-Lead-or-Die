@@ -6,6 +6,9 @@
 //   cap    = 3^log2(n) * log2(core)          (rescale)
 //   damage = n * log2(core)                  (damage)
 const fs = require('fs');
+const path = require('path');
+// 仓库根从脚本位置推导（tools/ 的上一级），不再写死盘符
+const ROOT = path.resolve(__dirname, '..');
 const vm = require('vm');
 
 function makeStub() {
@@ -30,7 +33,7 @@ global.window = makeStub();
 global.requestAnimationFrame = () => 0;
 const store = new Map();
 global.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
-vm.runInThisContext(fs.readFileSync('D:\\2048\\build\\engine.js', 'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(ROOT, 'build', 'engine.js'), 'utf8'));
 const G = globalThis.__CF__;
 
 const lvl = G.lvl;

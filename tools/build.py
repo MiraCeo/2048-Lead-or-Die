@@ -25,10 +25,13 @@ try:
 except Exception:
     pass
 
-ROOT = Path(r'D:\2048')
-SRC = ROOT / 'src'
-OUT_FILE = ROOT / '2048小游戏-教程七关.html'
-REFERENCE = ROOT / 'build' / 'reference' / '2048.original.html'
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _root import PATHS
+
+ROOT = PATHS.ROOT
+SRC = PATHS.SRC
+OUT_FILE = PATHS.DELIVERABLE
+REFERENCE = PATHS.ORIGINAL
 
 GUIDE_PH = '__GUIDE_B64__'
 TUT_PH = '__TUTORIAL_B64__'
