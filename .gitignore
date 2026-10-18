@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 
+# tools/format_engine.py 的临时区（拼接后的完整脚本、prettier 输出）
+/.fmt/
+
 # 可再生的构建产物：由 `python tools/build_engine.py` 从交付文件重新生成，
 # 仓库里保留的就是上一次改动的旧引擎，容易误导（项目文档 §14.2 第③条踩过这个坑）。
 # 注意：build/baseline/ 与 build/reference/ **必须保留** —— 前者是 build.py 的
