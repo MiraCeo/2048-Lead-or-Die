@@ -74,7 +74,9 @@ function mk(upRadius) {
 }
 
 console.log('neutrals parked at Chebyshev distance 2 from the core (unreachable by adjacency): ' + ring2.length);
-console.log('SITE_TP is a fixed 4 in the site loop, independent of radius.\n');
+// 注意：SITE_TP 已不再是固定值 —— siteBudgetAt(lv) = SITE_TP + 4*lv，
+// 随半径线成长（修复"半径拓宽了环、站点吞吐却被写死卡住"那次改动）。
+console.log('站点每回合吞吐 = SITE_TP + 4×半径等级（不是固定 4）。\n');
 console.log('radius | ringReach | absorbed in ONE turn | left');
 console.log('-------|-----------|----------------------|-----');
 for (const [label, up] of [['1 (base)', 0], ['2 (+1 level)', 1]]) {
@@ -89,5 +91,5 @@ for (const [label, up] of [['1 (base)', 0], ['2 (+1 level)', 1]]) {
   );
 }
 
-console.log('\nIf radius 2 absorbs only SITE_TP=4 of the ' + ring2.length +
-            ' now-reachable neutrals, the radius line is capped by a constant it does not raise.');
+console.log('\n期望：半径 2 能吸到的不止基础吞吐量 —— 站点吞吐随半径线一起涨，');
+console.log('      所以半径买的是覆盖面，而覆盖率本身也随等级提升。');
