@@ -40,7 +40,10 @@ class PATHS:
     TOOLS = ROOT / 'tools'
     SRC = ROOT / 'src'
     BUILD = ROOT / 'build'
-    REFERENCE = BUILD / 'reference'
+    # 参照物是**输入**，不是构建产物 —— 所以放顶层，不放 build/。
+    # （阶段 4 之前它在 build/reference/，名字会让人以为可以随便删，
+    #   而其中的 tutorial.script.js 是 derive_patches.py 的活依赖。）
+    REFERENCE = ROOT / 'reference'
     BASELINE = BUILD / 'baseline'
     REPORTS = BUILD / 'reports'
     TRACES = BUILD / 'traces'
@@ -57,27 +60,22 @@ class PATHS:
     TUTORIAL_REFERENCE = REFERENCE / 'tutorial.script.js'
     # 无头引擎（构建产物）
     ENGINE = BUILD / 'engine.js'
-    # 上一任作者的实验快照，tools/diff_engine.py 作为对照保留
-    ANALYZE_ENGINE = ROOT / '.analyze' / 'core-fleet.engine.js'
-
 
 def main():
     """直接运行可自检：打印解析结果并报告缺失项（便于排查搬运后的失效路径）。"""
     print('仓库根: %s' % PATHS.ROOT)
     print()
     for name in ('TOOLS', 'SRC', 'BUILD', 'REFERENCE', 'BASELINE', 'DELIVERABLE',
-                 'ORIGINAL', 'TUTORIAL_REFERENCE', 'ENGINE', 'ANALYZE_ENGINE'):
+                 'ORIGINAL', 'TUTORIAL_REFERENCE', 'ENGINE'):
         p = getattr(PATHS, name)
         mark = '存在' if p.exists() else '缺失'
         kind = '目录' if p.is_dir() else '文件'
         print('  %-20s %-4s %-4s %s' % (name, kind, mark, p.relative_to(PATHS.ROOT) if p.is_relative_to(PATHS.ROOT) else p))
     print()
-    missing = [n for n in ('SRC', 'BUILD', 'DELIVERABLE')
+    missing = [n for n in ('SRC', 'BUILD', 'DELIVERABLE', 'REFERENCE')
                if not getattr(PATHS, n).exists()]
     if missing:
         print('⚠️  关键路径缺失: %s' % ', '.join(missing))
-        print('    （ANALYZE_ENGINE 与 REFERENCE 允许缺失：前者是历史快照，'
-              '后者只在跑 derive_patches.py 时需要）')
         return 1
     print('✅ 关键路径齐备')
     return 0

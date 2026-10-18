@@ -36,10 +36,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _root import PATHS
 
 ROOT = PATHS.ROOT
-MAIN = ROOT / 'src' / 'main.script.js'
-REF = ROOT / 'build' / 'reference' / 'tutorial.script.js'
-OUT = ROOT / 'src' / 'tutorial.patches.py'
-LESSONS = ROOT / 'src' / 'tutorial.lessons.js'
+MAIN = PATHS.SRC / 'main.script.js'
+REF = PATHS.TUTORIAL_REFERENCE
+OUT = PATHS.SRC / 'tutorial.patches.py'
+LESSONS = PATHS.SRC / 'tutorial.lessons.js'
 
 BLOB_RE = re.compile(r"atob\('([A-Za-z0-9+/=]+)'\)")
 FUNC_RE = re.compile(r'function\s+([A-Za-z_$][\w$]*)\s*\(')
@@ -65,6 +65,17 @@ def hint(block: str) -> str:
 
 
 def main():
+    # ⚠️ 这个脚本**会写文件**：覆写 src/tutorial.patches.py，并把 lesson 脚手架
+    # 提取到 src/tutorial.lessons.js。它没有 dry-run，所以加一道显式开关 ——
+    # 我曾在一次"验证链"里顺手跑了它，把 13 条补丁覆盖成 2 条、lessons 从 11 行
+    # 改成 132 行（靠 git 恢复）。**校验补丁请用 check_patches.py，那是只读的。**
+    if '--i-know-this-writes' not in sys.argv:
+        print('本脚本会覆写 src/tutorial.patches.py 与 src/tutorial.lessons.js。')
+        print()
+        print('  · 只想检查补丁是否健康 -> python tools/check_patches.py   （只读）')
+        print('  · 确实要重新导出补丁   -> 本脚本加 --i-know-this-writes')
+        return 2
+
     main_src = MAIN.read_text(encoding='utf-8')
     ref_raw = REF.read_text(encoding='utf-8')
     ref_norm = BLOB_RE.sub("atob('__GUIDE_B64__')", ref_raw)
@@ -161,4 +172,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

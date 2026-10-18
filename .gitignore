@@ -7,12 +7,12 @@ __pycache__/
 
 # 可再生的构建产物：由 `python tools/build_engine.py` 从交付文件重新生成，
 # 仓库里保留的就是上一次改动的旧引擎，容易误导（项目文档 §14.2 第③条踩过这个坑）。
-# 注意：build/baseline/ 与 build/reference/ **必须保留** —— 前者是 build.py 的
-# 比对基线（--accept 写入），后者是步骤 0 的逐字节原始参照，忽略它们会让构建校验失去意义。
+# 注意：**参照物是输入，不在 build/ 下** —— `reference/` 放步骤 0 的逐字节原始参照
+# 与教程脚本模板（后者是 derive_patches.py 的活依赖）；`build/baseline/` 是构建比对基线。
+# 忽略它们会让构建校验失去意义。
 /build/engine*.js
-/build/core-fleet.engine.js
-# §6 那次相位诊断的 A/B 变体，由 `python tools/build_variant.py --position <相位> --out ...`
-# 按需生成，共 1.6MB 近重复内容；现役工具链不引用。
+# §6 那次相位诊断的 A/B 变体（生成器 build_variant.py 已归档到 tools/history/）。
+# 注：`/build/core-fleet.engine.js` 的条目已删 —— 那个文件随 .analyze/ 一起清理了。
 /build/variants/
 
 # 失败的 headless Chrome 残留（沙箱内起不来，见项目文档 §14.7 第 1 条）

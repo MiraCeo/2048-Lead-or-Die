@@ -76,6 +76,25 @@ def collect(text):
     return refs
 
 
+def resolve(ref):
+    """判断引用是否指向真实文件。
+
+    散文里常出现**语义化**的路径写法，例如 §15.5 的
+    「`build/reference/tutorial.script.js` 是活依赖 … → 已在阶段 5 移到 reference/」——
+    它描述的是"当时的位置"，检查器从散文里看不出前缀该剥到哪一层。
+
+    所以逐级剥掉最前面的目录名再试：`build/reference/tutorial.script.js`
+    会在剥掉 build/ 后命中 `reference/tutorial.script.js`。
+    这样"看似带前缀的描述性引用"不会误报，而真正不存在的文件仍然是失效。
+    """
+    parts = ref.split('/')
+    for k in range(len(parts)):
+        cand = ROOT.joinpath(*parts[k:])
+        if cand.exists():
+            return True
+    return False
+
+
 def main():
     missing = {}
     total = 0
@@ -87,7 +106,7 @@ def main():
         bad = []
         for ref, line in sorted(collect(text).items()):
             total += 1
-            if not (ROOT / ref).exists():
+            if not resolve(ref):
                 bad.append((ref, line))
         if bad:
             missing[doc] = bad

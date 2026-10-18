@@ -50,12 +50,15 @@ except Exception:
     pass
 
 HERE = Path(__file__).resolve().parent
-ROOT = next((p for p in [HERE, *HERE.parents] if (p / 'src').is_dir()), HERE)
-SRC = ROOT / 'src'
+sys.path.insert(0, str(HERE))
+from _root import PATHS
+
+ROOT = PATHS.ROOT
+SRC = PATHS.SRC
 ENGINE_DIR = SRC / 'engine'
 MANIFEST = ENGINE_DIR / 'manifest.json'
 TARGET = SRC / 'main.script.js'
-REFERENCE = ROOT / 'build' / 'reference' / 'main.script.original.js'
+REFERENCE = PATHS.REFERENCE / 'main.script.original.js'
 
 WRITE = '--write' in sys.argv
 SHOW_DIFF = '--diff' in sys.argv
