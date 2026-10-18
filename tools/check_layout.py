@@ -124,6 +124,18 @@ for sz in SIZES:
     check(bd > 0 and bw > 0 and (bd - bw) <= 24,
           '%-10s 棋盘框 %3dpx 贴合画布 %3dpx（差值 %d，应为内边距+边框 18）'
           % (sz, bd, bw, bd - bw))
+    # 中间列必须**跟着棋盘走**：列远宽于棋盘时，收缩后的棋盘框会变成
+    # "小方块浮在大片空白里"（v0.1.3 的观感问题）。
+    pa = grab(r'\.play-area:\s*x=\d+\s*y=\d+\s*w=(\d+)')
+    check(pa > 0 and bd > 0 and (pa - bd) <= 60,
+          '%-10s 中间列 %3dpx 贴合棋盘框 %3dpx（差值 %d，应 ≤60）'
+          % (sz, pa, bd, pa - bd))
+    # 顶栏是**全局工具条**，应横跨整页；挤在窄中列里会压住模式文字与按钮。
+    tb = grab(r'\.topbar:\s*x=\d+\s*y=\d+\s*w=(\d+)')
+    sh = grab(r'\.shell:\s*x=\d+\s*y=\d+\s*w=(\d+)')
+    check(tb > 0 and sh > 0 and tb >= sh * 0.85,
+          '%-10s 顶栏 %4dpx 横跨整页（外壳 %4dpx 的 %.0f%%）'
+          % (sz, tb, sh, 100.0 * tb / sh if sh else 0))
 
 print()
 print('%d 项失败' % len(fails))
