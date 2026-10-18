@@ -11,7 +11,20 @@
 .layout{grid-template-columns:180px minmax(450px,1fr) 244px}.layout>section{min-width:0}.board{width:min(100%,calc((100dvh - 390px)*860/886 + 18px));min-width:460px;margin-inline:auto}.board canvas{width:100%}.directions button:disabled{cursor:not-allowed}.status{overflow-wrap:anywhere}.mode,.directions,.toolbar,#previewHint,.status{max-width:880px;margin-left:auto;margin-right:auto}@media(max-height:800px){.board{min-width:430px}.shell{padding-top:12px}header{padding-bottom:12px}.layout{margin-top:12px}}
 
 /* Direct manipulation layout: the board fills the center column. */
-.layout{grid-template-columns:180px minmax(0,1fr) 244px}.play-area{min-width:0}.board{width:100%;min-width:0;max-width:none;margin:0;scroll-margin-top:14px}.board canvas{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none;cursor:default}.topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px;min-height:38px}.play-heading{display:flex;flex-direction:column;gap:4px;min-width:0}.play-heading #targetCount{font-size:10px;color:#728c68}.map-actions{display:flex;gap:8px;flex-shrink:0}.map-actions button{font-size:12px;padding:8px 12px}.map-keyhint{max-width:none;text-align:center;min-height:28px;padding-top:8px;line-height:1.7}.status{max-width:none;min-height:30px;margin-top:3px}.play-area #status{font-size:11px}.compact-list button{cursor:pointer}@media(max-width:1150px){.layout{grid-template-columns:155px minmax(0,1fr) 210px}.map-actions button{padding:7px 8px}.topbar{gap:6px}}@media(max-height:800px){.board{min-width:0;width:100%}}
+.layout{grid-template-columns:180px minmax(0,1fr) 244px}.play-area{min-width:0}.board{width:100%;min-width:0;max-width:none;margin:0;scroll-margin-top:14px}.board canvas{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none;cursor:default}.topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px;min-height:38px}.play-heading{display:flex;flex-direction:column;gap:4px;min-width:0}.play-heading #targetCount{font-size:10px;color:#728c68}
+.scan-line{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;color:#c4d6b6;font-size:11px;line-height:1.4}
+/* 状态槽：悬停详情（常驻）与操作反馈（临时）共用顶栏同一格。
+   反馈出现时用不透明底色**盖住**悬停详情，而不是两个文字叠在一起
+   （第一版就是叠的：截图里"100×100远征地图就绪…"压在"悬停数字查看单位详情"上）。 */
+.status-slot{position:relative;flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center}
+/* 按内容收缩并居中：短提示就是一个小药丸，长提示最多两行（再长则省略）。
+   不用 nowrap —— 操作反馈本身可能很长，单行截断等于丢信息。
+   也不用无限换行 —— 那会撑出顶栏、压到棋盘上。 */
+.status-slot>.feedback{left:50%;right:auto;top:50%;transform:translate(-50%,-50%);max-width:100%;text-align:center;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;background:#0f1b15;z-index:4}
+/* 反馈显示时**藏起**悬停详情，而不是靠不透明度硬盖。
+   原背景是 #0d1a14f2（95% 不透明），底下那行会透出来 5%，在浅色小字上看得见。
+   这里用 :has() 直接让它不可见；:has 不支持时仍有上面的全不透明背景兜底。 */
+.status-slot:has(>.feedback.show)>.scan-line{visibility:hidden}.map-actions{display:flex;gap:8px;flex-shrink:0}.map-actions button{font-size:12px;padding:8px 12px}.map-keyhint{max-width:none;text-align:center;min-height:28px;padding-top:8px;line-height:1.7}.status{max-width:none;min-height:30px;margin-top:3px}.play-area #status{font-size:11px}.compact-list button{cursor:pointer}@media(max-width:1150px){.layout{grid-template-columns:155px minmax(0,1fr) 210px}.map-actions button{padding:7px 8px}.topbar{gap:6px}}@media(max-height:800px){.board{min-width:0;width:100%}}
 #tutorialDialog{width:calc(100vw - 24px);height:calc(100vh - 24px);max-width:none;max-height:none;padding:0;border:1px solid #55734c;border-radius:14px;background:#101918;color:#e5eddb;overflow:hidden}#tutorialDialog::backdrop{background:#07100be8}#tutorialDialog .tutorial-bar{height:48px;display:flex;align-items:center;justify-content:space-between;padding:8px 18px;background:#1c2c21;border-bottom:1px solid #3b5036;font-size:12px}#tutorialFrame{display:block;width:100%;height:calc(100% - 48px);border:0;background:#101918}#showTutorial{border-color:#a1c479;color:#def2bf;background:#2b4025}
 /* 本轮：棋盘尺寸交给浏览器算；状态条改为不占位的临时浮层；棋盘上方不再常驻操作提示 */
 .play-area{position:relative}
@@ -19,7 +32,7 @@
 .feedback.show{opacity:1}
 #previewHint{min-height:0;padding-top:0}
 .board{width:100%;min-width:0;max-width:none;display:flex;justify-content:center;align-items:flex-start}
-.board canvas{width:auto;height:auto;max-width:100%;max-height:calc(100dvh - var(--board-chrome,230px))}
+.board canvas{width:auto;height:auto;max-width:100%;max-height:100%}
 /* 按需面板：科技树 */
 .panel-dialog{width:min(560px,92vw);max-height:88vh;padding:0;overflow:hidden;border:1px solid #55734c;border-radius:14px;background:#101918;color:#e5eddb}
 .panel-dialog::backdrop{background:#07100be8}
@@ -31,8 +44,36 @@
 .tech-info strong{font-size:13px;color:#e0efcf}
 .tech-info span{font-size:11px;color:#9db18f;line-height:1.6}
 .tech-row button{flex-shrink:0}
+/* ===== 首屏自适应：让"整页"等于视口，而不是让内容去撑页面 =====
+   问题：原先页面高度由**左右栏的内容高度**决定，棋盘只是被动缩放。
+   左侧栏五个面板（其中 SCAN 面板还预留了 70px 空白）加起来超过视口，
+   于是整页出现纵向滚动条，最下面的提示被切掉。
+   仅调 --board-chrome 治不了根：那个魔法数字只能约束棋盘，约束不了两栏。
+
+   改法：外壳锁定为视口高度 + 弹性列布局。
+     · footer 常驻底部（flex:0 0 auto）→ 最下面的提示永远同屏
+     · .layout 吃掉剩余高度（flex:1 + min-height:0）
+     · 左右栏内容超出时**栏内滚动**，不把整页顶出去
+     · 棋盘用 max-height:100% 吃掉剩余空间
+
+   演进记录：先试过"把 --board-chrome 从 230 调到 200"，但那只是把魔法数字
+   调准一点，治不了"两栏撑高页面"这个根因。改成弹性布局后实测
+   **--board-chrome 已完全不生效**（把它改成 50px，棋盘尺寸一字不变），
+   所以把它彻底删除了 —— 布局里不再有任何需要按屏幕手调的魔法数字。 */
+.shell{height:100dvh;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
+.layout{flex:1 1 auto;min-height:0;align-items:stretch;overflow:hidden}
+.layout>aside{min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.play-area{min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.play-area>.board{flex:1 1 auto;min-height:0;align-items:center}
+/* 顶栏与预览位不参与压缩（否则空间紧张时会被压扁） */
+.play-area>.topbar{flex:0 0 auto}
+.play-area>#previewHint{flex:0 0 auto}
+/* 预览位默认是空的（clearPreview 会写空串），却因 .map-keyhint 的 min-height
+   一直占着 28px。:empty 时彻底收掉，把这点高度还给棋盘。 */
+.map-keyhint:empty{min-height:0;padding-top:0}
+footer{flex:0 0 auto}
 </style></head><body><main class="shell"><header><div class="brand"><div class="mark">✣</div><div><h1>尔领死吧</h1><div class="en">2048 远征 · 合成 · 收编 · 扩张</div></div></div><div class="header-actions"><button id="showTutorial">互动教程 · 7关</button><button id="showGuide">游戏介绍 ↗</button></div></header><div class="layout">
-<aside><div class="panel"><h2>COMMAND / 当前控制核心</h2><div class="big" id="coreNumber"></div><div class="stat"><span>全队共享 core</span><strong id="sharedCore"></strong></div><div class="stat"><span>世界回合</span><strong id="turn"></strong></div><div class="stat"><span>主体 / 其他己方</span><strong id="members"></strong></div><div class="divider"></div><div class="stat"><span>最高合成值</span><strong id="goalProgress"></strong></div><div class="stat"><span>合成分</span><strong id="score"></strong></div></div><div class="panel"><h2>ACTIONS / 行动储备</h2><div class="inline-bank"><strong id="ap"></strong><span class="mini-detail" style="cursor:help" title="每 2 次有效主移动获得 1 点">额外行动点</span></div><div class="stat"><span>下一点</span><strong id="apNext"></strong></div></div><div class="panel"><h2>TECH / 科技点</h2><div class="inline-bank"><strong id="tech"></strong><span class="mini-detail">科技点</span></div><button id="openTech">打开科技树</button></div><div class="panel"><h2>FLEETS / 切换与回到核心</h2><div id="fleetSummary" class="mini-detail"></div><div id="fleets" class="compact-list"></div></div><div class="panel"><h2>SCAN / 悬停扫描</h2><div id="inspect" class="inspect">悬停数字查看单位详情。</div></div></aside>
-<section class="play-area"><div class="topbar"><div class="play-heading"><span><i class="dot"></i><span id="modeLabel"></span></span><span id="targetCount"></span></div><div class="map-actions"><button id="undo" title="撤销上一次操作（Z）">↶ 撤销 <span id="undoCount"></span></button><button id="restart" title="重新开始本局">↻ 重开</button></div></div><div id="feedback" class="feedback" role="status" aria-live="polite"></div><div id="previewHint" class="mini-detail map-keyhint"></div><div class="board"><div id="gameOver" style="display:none;position:absolute;inset:8px;background:#10201aed;z-index:2;align-items:center;justify-content:center;flex-direction:column;border-radius:8px;backdrop-filter:blur(6px)"><h2 id="endTitle" style="font-size:28px;color:#e6efda">舰队失去指挥</h2><p id="endText" class="muted"></p><button id="resume" style="display:none;margin-bottom:10px">继续挑战</button><button id="endUndo">撤销上一操作</button><button id="endRestart" style="margin-top:12px">重新出发</button></div><canvas id="canvas" width="860" height="860" tabindex="0" aria-label="100乘100世界，所选核心周围25乘25视野"></canvas></div></section>
+<aside><div class="panel"><h2>COMMAND / 当前控制核心</h2><div class="big" id="coreNumber"></div><div class="stat"><span>全队共享 core</span><strong id="sharedCore"></strong></div><div class="stat"><span>世界回合</span><strong id="turn"></strong></div><div class="stat"><span>主体 / 其他己方</span><strong id="members"></strong></div><div class="divider"></div><div class="stat"><span>最高合成值</span><strong id="goalProgress"></strong></div><div class="stat"><span>合成分</span><strong id="score"></strong></div></div><div class="panel"><h2>ACTIONS / 行动储备</h2><div class="inline-bank"><strong id="ap"></strong><span class="mini-detail" style="cursor:help" title="每 2 次有效主移动获得 1 点">额外行动点</span></div><div class="stat"><span>下一点</span><strong id="apNext"></strong></div></div><div class="panel"><h2>TECH / 科技点</h2><div class="inline-bank"><strong id="tech"></strong><span class="mini-detail">科技点</span></div><button id="openTech">打开科技树</button></div><div class="panel"><h2>FLEETS / 切换与回到核心</h2><div id="fleetSummary" class="mini-detail"></div><div id="fleets" class="compact-list"></div></div></aside>
+<section class="play-area"><div class="topbar"><div class="play-heading"><span><i class="dot"></i><span id="modeLabel"></span></span><span id="targetCount"></span></div><div class="status-slot"><span id="inspect" class="scan-line" title="">悬停数字查看单位详情</span><div id="feedback" class="feedback" role="status" aria-live="polite"></div></div><div class="map-actions"><button id="undo" title="撤销上一次操作（Z）">↶ 撤销 <span id="undoCount"></span></button><button id="restart" title="重新开始本局">↻ 重开</button></div></div><div id="previewHint" class="mini-detail map-keyhint"></div><div class="board"><div id="gameOver" style="display:none;position:absolute;inset:8px;background:#10201aed;z-index:2;align-items:center;justify-content:center;flex-direction:column;border-radius:8px;backdrop-filter:blur(6px)"><h2 id="endTitle" style="font-size:28px;color:#e6efda">舰队失去指挥</h2><p id="endText" class="muted"></p><button id="resume" style="display:none;margin-bottom:10px">继续挑战</button><button id="endUndo">撤销上一操作</button><button id="endRestart" style="margin-top:12px">重新出发</button></div><canvas id="canvas" width="860" height="860" tabindex="0" aria-label="100乘100世界，所选核心周围25乘25视野"></canvas></div></section>
 <aside class="right"><div class="panel"><h2>WORLD / 全图态势</h2><canvas id="minimap" width="300" height="300" aria-label="全图小地图，绿色己方，红色敌方，金色中立密集区，灰点散落数字，白框当前视野"></canvas><div class="map-legend"><span><i style="background:#b7e991"></i>己方单位</span><span><i style="background:#ed816d"></i>敌方单位</span><span><i style="background:#dcb66e"></i>中立密集区</span><span><i style="background:#788773"></i>散落数字</span><span><i style="border:1px solid #fff"></i>当前视野</span><span>○ 核心 / ▣ 友方碉堡</span></div></div><div class="panel"><h2>THREAT / 战场节奏</h2><div class="stat"><span>增援 / 等级</span><strong id="waveInfo"></strong></div><div class="stat"><span>己方 / 敌方核心</span><strong id="coreCounts"></strong></div><div class="stat"><span>友方碉堡 / 下次支援</span><strong id="supportStatus"></strong></div><div class="stat"><span>常规敌方行动</span><strong id="enemyNext"></strong></div><div class="stat"><span>中立数字 / 组</span><strong id="neutral"></strong></div></div><div class="panel"><h2>COMMS / 最近战报</h2><details class="log-wrap"><summary id="logSummary" class="mini-detail"></summary><div id="log" class="log"></div></details></div></aside></div><footer><span>探索 · 编队 · 合成 2048</span><span>v__VERSION__ · 自动保存 · 详细机制已移至游戏介绍</span></footer><dialog id="techDialog" class="panel-dialog" aria-label="科技树"><div class="panel-dialog-bar"><span>科技树 · 打开时世界时间冻结</span><button id="closeTech">关闭 ✕</button></div><div class="panel-dialog-body"><div class="mini-detail">科技点来源与机制见「游戏介绍」</div><div id="techTree" class="tech-list"></div><button id="convertScore" title="每 100 积分兑换 1 点科技点，会消耗积分">兑换积分 → 科技点</button></div></dialog></main><dialog id="dialog"><h3>重新部署远征？</h3><p>重置100×100地图、敌我编队、行动点和撤销记录，开启一场新的远征。</p><button id="cancel">继续探索</button><button id="confirm">确认重开</button></dialog>
 <dialog id="tutorialDialog" aria-label="七关互动教程"><div class="tutorial-bar"><span>互动教程 · 独立进度 / 正式对局已暂停</span><button id="closeTutorial">返回当前对局 ✕</button></div><iframe id="tutorialFrame" title="尔领死吧七关互动教程" sandbox="allow-scripts"></iframe></dialog><dialog id="goalDialog"><div class="muted" style="letter-spacing:3px;color:#e7dca0">MILESTONE REACHED</div><h2 style="font-size:38px;color:#fff0a3;margin:16px 0">2048 达成！</h2><p id="goalText"></p><p>这不是终点。你可以结算本次远征，也可以继续合成更大的数字。</p><button id="settleGoal">结算远征</button><button id="continueGoal">继续挑战</button></dialog><dialog id="guideDialog" class="guide-dialog"><div class="guide-bar"><span>游戏介绍 · 独立阅读页</span><button id="closeGuide">关闭 ✕</button></div><iframe id="guideFrame" title="尔领死吧游戏介绍" sandbox="allow-scripts"></iframe></dialog><script>__MAIN_SCRIPT__</script></body></html>

@@ -255,19 +255,37 @@
     if (logSum) {
       const all = s.logs || [];
       const cnt = (pre) => all.filter((l) => l.startsWith(pre)).length;
+      // 折叠状态与"有没有被折叠"必须一致：
+      //   条数 ≤ 预览数 → 没有任何内容被折叠，必须**展开**，否则摘要写着
+      //   "已全部显示"而正文一条都看不见（第一版就踩了这个自相矛盾）。
+      //   条数 >  预览数 → 交给用户决定，**只自动展开、绝不自动关闭**。
+      //   后者很重要：ui() 每次操作都会跑，若每次都按条件赋 open，
+      //   玩家手动展开的列表会被下一次渲染强行关掉。
+      const wrap = logSum.parentElement;
+      const isDetails = wrap && wrap.tagName === 'DETAILS';
+      if (isDetails && all.length <= LOG_PREVIEW) wrap.open = true;
       logSum.textContent =
         all.length <= LOG_PREVIEW
           ? `共 ${all.length} 条 · 已全部显示`
           : `最近 ${LOG_PREVIEW} 条 / 共 ${all.length} 条 · 点击展开` +
             `（增援 ${cnt('全图增援')} · 遭遇战 ${cnt('血量对碰')} · 核心被毁 ${cnt('己方核心') + cnt('敌方核心')}）`;
+      const shown = isDetails && wrap.open ? all : all.slice(0, LOG_PREVIEW);
+      logBox.replaceChildren(
+        ...shown.map((t) => {
+          const d = document.createElement('div');
+          d.textContent = t;
+          return d;
+        }),
+      );
+    } else {
+      logBox.replaceChildren(
+        ...s.logs.slice(0, LOG_PREVIEW).map((t) => {
+          const d = document.createElement('div');
+          d.textContent = t;
+          return d;
+        }),
+      );
     }
-    logBox.replaceChildren(
-      ...s.logs.slice(0, LOG_PREVIEW).map((t) => {
-        const d = document.createElement('div');
-        d.textContent = t;
-        return d;
-      }),
-    );
     $('gameOver').style.display = s.dead || s.settled ? 'flex' : 'none';
     $('endTitle').textContent = s.settled ? '2048 · 远征已结算' : '舰队失去指挥';
     $('resume').style.display = s.settled && !s.dead ? 'block' : 'none';
@@ -281,6 +299,17 @@
       $('goalDialog').showModal();
     }
   }
+  // 战报折叠状态的即时响应：玩家点开/收起时立刻重渲染，
+  // 否则要等下一次操作才会把完整的 30 条画出来（看起来像"点了没反应"）。
+  (function () {
+    const sum = $('logSummary');
+    const wrap = sum && sum.parentElement;
+    if (wrap && wrap.tagName === 'DETAILS') {
+      wrap.addEventListener('toggle', () => {
+        if (s) ui();
+      });
+    }
+  })();
   function rect(x, y, w, h, r, fill, stroke) {
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, r);

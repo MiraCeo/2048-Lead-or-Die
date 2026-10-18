@@ -134,8 +134,16 @@ console.log('\n=== 信息重复与命名 ===');
 
 console.log('\n=== 棋盘尺寸不再用魔法数字 ===');
 {
-  check(has(HTML, 'max-height:calc(100dvh - var(--board-chrome,230px))'),
-        '棋盘高度交给浏览器按可用空间算（开销是单个可调变量）');
+  // 演进：曾经是 max-height:calc(100dvh - var(--board-chrome,230px))，
+  // 但那个变量只能约束棋盘、约束不了左右两栏撑高页面。
+  // 改成弹性布局后实测它已完全不生效（改成 50px 棋盘尺寸一字不变），故删除，
+  // 现在棋盘用 max-height:100% 吃掉 .board 的剩余高度。
+  check(has(HTML, '.board canvas{width:auto;height:auto;max-width:100%;max-height:100%}'),
+        '棋盘高度吃弹性布局的剩余空间（没有魔法数字）');
+  check(notHas(HTML, 'var(--board-chrome') && notHas(HTML, '--board-chrome:'),
+        '旧的 --board-chrome 变量已移除（定义与引用都没了；注释里保留演进记录不算）');
+  check(has(HTML, '.shell{height:100dvh'), '整页锁定视口高度（页面不再由内容撑高）');
+  check(has(HTML, 'footer{flex:0 0 auto}'), '页脚常驻底部（最下面的提示永远同屏）');
   check(has(HTML, '.board canvas{width:auto;height:auto'), 'canvas 等比缩放（不再拉伸）');
 }
 

@@ -241,21 +241,27 @@
     inspectedState = s;
     inspectedIndex = i;
     const t = s.g[i];
+    let text;
     if (!t) {
-      $('inspect').textContent = `${Math.floor(i / N) + 1}行 ${(i % N) + 1}列 · 空地`;
-      return;
+      text = `${Math.floor(i / N) + 1}行 ${(i % N) + 1}列 · 空地`;
+    } else {
+      const label = t.support
+        ? '友方支援碉堡'
+        : t.side === 'n'
+          ? '中立'
+          : t.side === 'e'
+            ? '敌方' + kindName[(t.core ? t : teamCore(s, t.team))?.kind || 'squad']
+            : connected(s).has(i)
+              ? '己方主体'
+              : '其他己方';
+      text =
+        `${Math.floor(i / N) + 1}行 ${(i % N) + 1}列 · ${label}${t.core ? '核心' : '数字'} ${t.n}。${t.side === 'n' ? (t.nc ? '中立密集区：' + s.g.filter((u) => u?.side === 'n' && u.nc === t.nc).length + '块。' : '散落中立数字；四向连通达到3块即形成密集区。') : `core=${coreValue(s, t)}${t.support ? '（独立建筑）' : ''}，血量 ${t.hp}/${t.cap}，伤害 ${damage(s, t)}，射程8格。${t.side === 'p' && !t.support ? (t.hp < t.cap ? '受伤中：累积 ' + (t.payload || 0) + ' 每回合转为回血（成长暂停）' : '吸收上限 ' + ABSORB_CAP + '（' + (t.n >= ABSORB_CAP ? '已达上限，不再吸收' : '可吸收 · 累积 ' + (t.payload || 0)) + '）') : ''}${t.side === 'e' && t.core ? '编队 ' + s.g.filter((u) => u?.side === 'e' && u.team === t.team).length + '/' + desiredSize(t) + ' 块。' : ''}`}${t.core && t.side === 'p' ? '点击切换核心与视野。' : ''}`;
     }
-    const label = t.support
-      ? '友方支援碉堡'
-      : t.side === 'n'
-        ? '中立'
-        : t.side === 'e'
-          ? '敌方' + kindName[(t.core ? t : teamCore(s, t.team))?.kind || 'squad']
-          : connected(s).has(i)
-            ? '己方主体'
-            : '其他己方';
-    $('inspect').textContent =
-      `${Math.floor(i / N) + 1}行 ${(i % N) + 1}列 · ${label}${t.core ? '核心' : '数字'} ${t.n}。${t.side === 'n' ? (t.nc ? '中立密集区：' + s.g.filter((u) => u?.side === 'n' && u.nc === t.nc).length + '块。' : '散落中立数字；四向连通达到3块即形成密集区。') : `core=${coreValue(s, t)}${t.support ? '（独立建筑）' : ''}，血量 ${t.hp}/${t.cap}，伤害 ${damage(s, t)}，射程8格。${t.side === 'p' && !t.support ? (t.hp < t.cap ? '受伤中：累积 ' + (t.payload || 0) + ' 每回合转为回血（成长暂停）' : '吸收上限 ' + ABSORB_CAP + '（' + (t.n >= ABSORB_CAP ? '已达上限，不再吸收' : '可吸收 · 累积 ' + (t.payload || 0)) + '）') : ''}${t.side === 'e' && t.core ? '编队 ' + s.g.filter((u) => u?.side === 'e' && u.team === t.team).length + '/' + desiredSize(t) + ' 块。' : ''}`}${t.core && t.side === 'p' ? '点击切换核心与视野。' : ''}`;
+    // 悬停详情现在显示在**顶栏单行**里（原先占一个 70px 的 SCAN 面板，
+    // 把左侧栏撑到超出视口）。单行放不下完整详情，所以用 title 提供全文。
+    const el = $('inspect');
+    el.textContent = text;
+    el.title = text;
   }
   function inputBlocked() {
     return (
