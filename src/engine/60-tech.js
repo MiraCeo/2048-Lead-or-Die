@@ -1,5 +1,5 @@
 // ==== 60-tech ====
-// 来源: main.script.js 第 75–93 行（原样搬移，未改一字符）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 75–93 行（此后经阶段 3 改名、阶段 4 格式化）
 // 科技树 UI 与购买、飞行器成长、置换
   function checkGoal(q, turn = q.turn) {
     const best = Math.max(2, ...q.g.filter((t) => t?.side === 'p' && !t.support).map((t) => t.n));

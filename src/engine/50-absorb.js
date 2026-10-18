@@ -1,5 +1,5 @@
 // ==== 50-absorb ====
-// 来源: main.script.js 第 58–74 行（原样搬移，未改一字符）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 58–74 行（此后经阶段 3 改名、阶段 4 格式化）
 // 回血、吸收结算、自动收集、科技树取值
   function extraStep(q, id, dir) {
     if (q.dead || q.settled) return { error: '已失去所有核心，请撤销或重新开始。' };

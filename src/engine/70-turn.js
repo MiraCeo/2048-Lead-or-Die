@@ -1,5 +1,5 @@
 // ==== 70-turn ====
-// 来源: main.script.js 第 94–105 行（原样搬移，未改一字符）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 94–105 行（此后经阶段 3 改名、阶段 4 格式化）
 // worldStep 回合循环、camera/屏幕映射
   function techInfoAt(line, lv) {
     if (line === 'tp') return '每块每回合吸收 ' + absorbTpAt(lv) + ' 个';

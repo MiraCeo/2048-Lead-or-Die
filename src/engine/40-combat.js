@@ -1,5 +1,5 @@
 // ==== 40-combat ====
-// 来源: main.script.js 第 49–57 行（原样搬移，未改一字符）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 49–57 行（此后经阶段 3 改名、阶段 4 格式化）
 // 接触、主移动、额外操作
     for (let k = 0; k < 2; k++) {
       const i = uniformEmpty(q);

@@ -1,5 +1,5 @@
 // ==== 30-units ====
-// 来源: main.script.js 第 26–48 行（原样搬移，未改一字符）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 26–48 行（此后经阶段 3 改名、阶段 4 格式化）
 // 存档编码、敌方编成、初始盘面
   function paintOutlines(q, cam) {
     const cells = [];

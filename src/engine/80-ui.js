@@ -1,5 +1,5 @@
 // ==== 80-ui ====
-// 来源: main.script.js 第 106–129 行（原样搬移，未改一字符）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 106–129 行（此后经阶段 3 改名、阶段 4 格式化）
 // 重绘/撤销/重开、小地图、ui()、拖拽绘制
   function remember() {
     history.push(copy(s));

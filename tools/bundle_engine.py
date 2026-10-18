@@ -81,8 +81,7 @@ def main():
     trailing_nl = man.get('trailingNewline', True)
 
     print('清单: %s' % MANIFEST)
-    print('模块: %d 个，合计 %d 行（原文件 %d 行）'
-          % (len(man['modules']), sum(m['lines'] for m in man['modules']), man['sourceLines']))
+    print('模块: %d 个' % len(man['modules']))
     print()
 
     out_lines = []
@@ -94,19 +93,12 @@ def main():
             problems.append('模块文件缺失: %s' % path.name)
             continue
         body = read_module(path, header_lines)
-        if len(body) != m['lines']:
-            # manifest 里的 lines 是**阶段 2 拆分时**的记录。阶段 4 格式化后
-            # 模块行数必然改变，所以这只是一条装饰性元数据，不构成失败条件。
-            msg = ('%s: 正文 %d 行，清单记 %d 行'
-                   % (name, len(body), m['lines']))
-            if ALLOW_DIVERGE:
-                print('  %-14s %4d 行  (清单记 %d，已允许分叉)'
-                      % (name, len(body), m['lines']))
-                out_lines.extend(body)
-                continue
-            problems.append(msg)
         out_lines.extend(body)
-        print('  %-14s %4d 行  (原 %d\u2013%d)' % (name, len(body), m['start'], m['end']))
+        # 溯源区间是**阶段 2 压缩文本**的行号，只作归因展示，不参与校验
+        # （清单里刻意不记行数，见 extract_engine.py 的说明）。
+        a, b = m.get('origStart'), m.get('origEnd')
+        tag = ('溯源 %d\u2013%d' % (a, b)) if a is not None else '（无溯源信息）'
+        print('  %-14s %4d 行  (%s)' % (name, len(body), tag))
 
     if problems:
         print('\n❌ 模块与清单不符：')

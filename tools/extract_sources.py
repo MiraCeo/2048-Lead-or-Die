@@ -1,5 +1,17 @@
 """Extract the shipped single-file HTML into authoring sources under src/.
 
+⚠️⚠️ **危险工具，只在「回到步骤 0」时才用。** ⚠️⚠️
+
+它把**交付文件**当作输入，**整份覆盖** `src/` 下的外壳与脚本。现状是
+`src/` 才是唯一真源、交付文件是产物 —— 方向与它相反。所以现在跑它会造成：
+
+  · `src/engine/` 的 11 个可读模块被抹掉（它不认识 engine/，只写 main.script.js）
+  · 阶段 3 的改名、阶段 4 的格式化全部丢失
+  · 13 条补丁锚点失配、构建失败
+
+它属于步骤 0 的一次性引导工具，之后再也用不到；保留是为了记录"原始交付文件
+如何被拆成 src/"。真要重跑，请先想清楚为什么 —— 并用 git 保护现场。
+
 Everything is derived from the ONE shipped file, so the extraction is verifiable:
 tools/build.py must rebuild that file byte-for-byte from src/.
 

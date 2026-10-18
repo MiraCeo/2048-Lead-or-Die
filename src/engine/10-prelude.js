@@ -1,5 +1,5 @@
 // ==== 10-prelude ====
-// 来源: main.script.js 第 1–13 行（阶段 3 改过存档 KEY，见项目文档 §16）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 1–13 行（此后经阶段 3 改名、阶段 4 格式化）
 // IIFE 头、'use strict'、DOM/常量、全局状态、工具函数
 (() => {
   'use strict';

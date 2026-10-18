@@ -1,5 +1,5 @@
 // ==== 20-board ====
-// 来源: main.script.js 第 14–25 行（原样搬移，未改一字符）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 14–25 行（此后经阶段 3 改名、阶段 4 格式化）
 // core 取值、rescale、连通、分化、中性密集区、轮廓
   function sharedCore(q) {
     const main = q.g.find((t) => t?.side === 'p' && t.core && t.id === q.primary);

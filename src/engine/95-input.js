@@ -1,5 +1,5 @@
 // ==== 95-input ====
-// 来源: main.script.js 第 149–160 行（阶段 3 改过：移除旧档导入，见项目文档 §16）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 149–160 行（此后经阶段 3 改名、阶段 4 格式化）
 // 指针/键盘/对话框接线、教程与介绍
   const tutorialHTML = new TextDecoder('utf-8').decode(
     Uint8Array.from(atob('__TUTORIAL_B64__'), (c) => c.charCodeAt(0)),

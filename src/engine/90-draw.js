@@ -1,5 +1,5 @@
 // ==== 90-draw ====
-// 来源: main.script.js 第 130–148 行（原样搬移，未改一字符）
+// 溯源: 阶段 2 的压缩文本 main.script.js 第 130–148 行（此后经阶段 3 改名、阶段 4 格式化）
 // 方块绘制、整帧 draw、特效渲染
     rect(p.x - half, p.y - half, size, size, rad, null, stroke);
   }

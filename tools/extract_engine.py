@@ -61,9 +61,22 @@ def main():
     if trailing_nl:
         lines = lines[:-1]
 
-    print('原文件: %d 行%s' % (len(lines), '（以换行结尾）' if trailing_nl else ''))
+    # ⚠️ 源码已被阶段 4 格式化为 2282 行，而 MANIFEST 的行区间是针对**阶段 2 的 161 行**
+    # 压缩文本写的。所以现在的 extract 只能做两件事之一：
+    #   --manifest-only  只重新生成清单（安全，不碰模块内容）
+    #   其他             **仅当源码仍是 161 行时**才允许重切模块，否则拒绝
+    # 之所以要这道闸：重切会把格式化后的模块覆盖回压缩内容，那是破坏性的。
+    manifest_only = '--manifest-only' in sys.argv
+    if not manifest_only and len(lines) != 161:
+        sys.exit('拒绝执行：src/main.script.js 现有 %d 行，而本脚本的行区间是针对 161 行\n'
+                 '的压缩文本写的。重切会覆盖掉已格式化的模块内容。\n'
+                 '  · 只想更新清单：加 --manifest-only\n'
+                 '  · 真要重新拆分：请先确认源码已回到 161 行压缩格式' % len(lines))
 
-    # 覆盖性校验：区间必须无缝且完整覆盖 1..N
+    print('原文件: %d 行%s%s' % (len(lines), '（以换行结尾）' if trailing_nl else '',
+                                 '  [--manifest-only]' if manifest_only else ''))
+
+    # 覆盖性校验：区间必须无缝且连续（针对**清单自身**，与当前文件无关）
     expect = 1
     for name, a, b, _ in MANIFEST:
         if a != expect:
@@ -71,42 +84,64 @@ def main():
         if b < a:
             sys.exit('区间非法：%s [%d,%d]' % (name, a, b))
         expect = b + 1
-    if expect != len(lines) + 1:
+    # 只有真的要重切模块时，才要求清单覆盖**当前**文件
+    if not manifest_only and expect != len(lines) + 1:
         sys.exit('区间未覆盖全文件：覆盖到 %d，实际 %d 行' % (expect - 1, len(lines)))
 
     OUTDIR.mkdir(parents=True, exist_ok=True)
     written = []
 
-    for name, a, b, desc in MANIFEST:
-        body = lines[a - 1:b]
-        header = ('// ==== %s ====\n'
-                  '// 来源: main.script.js 第 %d\u2013%d 行（原样搬移，未改一字符）\n'
-                  '// %s\n' % (name, a, b, desc))
-        out = OUTDIR / (name + '.js')
-        io.open(out, 'w', encoding='utf-8', newline='').write(header + '\n'.join(body) + '\n')
-        written.append((name, a, b, len(body)))
+    if not manifest_only:
+        for name, a, b, desc in MANIFEST:
+            body = lines[a - 1:b]
+            # ⚠️ 措辞随阶段演进：阶段 2 是"原样搬移"，阶段 3 改过 KEY，
+            # 阶段 4 被 prettier 格式化过。写死"未改一字符"会误导人。
+            header = ('// ==== %s ====\n'
+                      '// 溯源: 阶段 2 的压缩文本 main.script.js 第 %d\u2013%d 行'
+                      '（此后经阶段 3 改名、阶段 4 格式化）\n'
+                      '// %s\n' % (name, a, b, desc))
+            out = OUTDIR / (name + '.js')
+            io.open(out, 'w', encoding='utf-8', newline='').write(header + '\n'.join(body) + '\n')
+            written.append((name, a, b, len(body)))
 
     # 写清单，供 bundler 使用（bundler 以清单为准，不从文件名序号猜顺序）
+    #
+    # ⚠️ 这里**不记每个模块的行数**。
+    # 阶段 2 当时记了 `lines`，用来校验拆分没切错；但阶段 4 的 prettier 格式化
+    # 必然改变行数，那个字段就永久过期了 —— 而它会出现在 bundler 的输出里
+    # （"正文 413 行，清单记 23 行"），让人以为哪里坏了。
+    # 改成只留**仍然成立**的字段：
+    #   · name / 顺序      —— 拼接顺序，永远有效
+    #   · headerLines      —— 每个模块文件的注释头行数，永远有效
+    #   · origStart/origEnd —— 该模块来自**阶段 2 那个压缩文本**的哪几行，
+    #                          仅供溯源（模块头注释里也写着）。格式化后与现文无关。
     man = {
         'source': 'src/main.script.js',
-        'sourceLines': len(lines),
         'trailingNewline': trailing_nl,
         'headerLines': 3,
-        'modules': [{'name': n, 'start': a, 'end': b, 'lines': ln}
-                    for (n, a, b, ln) in written],
+        'note': ('origStart/origEnd 指向阶段 2 的压缩文本（161 行），仅供溯源。'
+                 '阶段 4 格式化后模块行数与它无关，故本清单不记行数。'),
+        'modules': [{'name': n, 'origStart': a, 'origEnd': b}
+                    for (n, a, b, _) in MANIFEST],
     }
     io.open(OUTDIR / 'manifest.json', 'w', encoding='utf-8', newline='\n').write(
         json.dumps(man, ensure_ascii=False, indent=2) + '\n')
 
     print()
-    print('%-14s %-12s %8s  %s' % ('模块', '原行区间', '行数', '说明'))
-    print('-' * 96)
-    for (name, a, b, desc), (_, _, _, ln) in zip(MANIFEST, written):
-        print('%-14s %-12s %8d  %s' % (name, '%d\u2013%d' % (a, b), ln, desc))
-    print('-' * 96)
-    print('%-14s %-12s %8d' % ('合计', '', sum(w[3] for w in written)))
-    print()
-    print('清单: %s' % (OUTDIR / 'manifest.json'))
+    if manifest_only:
+        print('已重新生成清单（未改动任何模块文件）: %s' % (OUTDIR / 'manifest.json'))
+        print()
+        for (name, a, b, desc) in MANIFEST:
+            print('  %-14s 溯源 %d\u2013%d   %s' % (name, a, b, desc))
+    else:
+        print('%-14s %-12s %8s  %s' % ('模块', '溯源区间', '行数', '说明'))
+        print('-' * 96)
+        for (name, a, b, desc), (_, _, _, ln) in zip(MANIFEST, written):
+            print('%-14s %-12s %8d  %s' % (name, '%d\u2013%d' % (a, b), ln, desc))
+        print('-' * 96)
+        print('%-14s %-12s %8d' % ('合计', '', sum(w[3] for w in written)))
+        print()
+        print('清单: %s' % (OUTDIR / 'manifest.json'))
 
 
 if __name__ == '__main__':
